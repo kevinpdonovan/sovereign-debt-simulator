@@ -132,7 +132,7 @@ const ROLES = {
   },
   imf_chief:{
     name:'IMF Mission Chief',
-    tagline:'You prescribe. Others swallow.',
+    tagline:'You prescribe. Others follow.',
     desc:'You arrive twice a year with a briefcase of data and a programme of conditions. You believe in what you are doing. You do not live with the consequences.',
     color:'#7d2a3a', bg:'#f5e8ea'
   },
@@ -150,9 +150,9 @@ const ROLES = {
 const DEF = {
   chinese_debt:{phase:4,text:'The road loans signed in 2009 are entering their peak debt service window — at exactly the moment copper revenues have collapsed. Currency depreciation has made these dollar-denominated payments 40% more expensive in local terms than when you signed them.'},
   both_debt:{phase:4,text:'The combined World Bank and Chinese loans from 2009 — individually justifiable, together heavy — are entering their peak repayment period at the worst possible moment.'},
-  eurobond_full:{phase:5,text:'The $750m Eurobond issued in 2012 is approaching maturity. Refinancing it in the current market — with Kambala\'s credit rating at B- — will cost twice what the original borrowing did. The bill for 2012\'s optimism has arrived.'},
+  eurobond_full:{phase:5,text:'The $750m Eurobond issued in 2012 is approaching maturity. Refinancing it in the current market — with Varundi\'s credit rating at B- — will cost twice what the original borrowing did. The bill for 2012\'s optimism has arrived.'},
   eurobond_small:{phase:5,text:'The $300m Eurobond from 2012 is approaching maturity. It is manageable — smaller than the full issuance, and the fiscal position, while strained, is not desperate.'},
-  imf_positive:{phase:4,text:'Your 2009 Article IV — which celebrated Kambala\'s growth trajectory — is being cited by the Finance Ministry as evidence that the IMF itself endorsed the borrowing strategy it now criticises. That early credibility is being called in.'},
+  imf_positive:{phase:4,text:'Your 2009 Article IV — which celebrated Varundi\'s growth trajectory — is being cited by the Finance Ministry as evidence that the IMF itself endorsed the borrowing strategy it now criticises. That early credibility is being called in.'},
   imf_nuanced:{phase:4,text:'Your 2009 assessment is being quoted selectively: the optimistic headline, not the caveats in the annex. You wrote the caveats. Nobody read them.'},
   imf_supported_bond:{phase:4,text:'Your informal endorsement of the 2012 Eurobond has resurfaced in the government\'s public defence of its borrowing strategy. You are cited in a press release you did not approve.'},
   high_wages:{phase:5,text:'The 15% wage increase won in 2011 has become a fixed cost that cannot be cut without triggering a constitutional challenge. In the current fiscal squeeze, it is consuming budget space that should go to drug procurement.'},
@@ -173,7 +173,7 @@ const PHASES = [
 {id:1, name:'The Clean Slate', years:'2008–2009',
  world:`In September 2008, Lehman Brothers collapsed in New York. Within weeks, the copper price fell 60% — from $8,800 per tonne to under $3,500. For a country where copper accounts for nine-tenths of export earnings, this is not a distant financial crisis. It lands directly in the national budget.
 
-The shock is severe but short. By mid-2009, copper is recovering. The IMF has extended emergency facilities across the continent. Kambala exits the crisis with something rare: a clean balance sheet and a world suddenly very interested in African growth stories.
+The shock is severe but short. By mid-2009, copper is recovering. The IMF has extended emergency facilities across the continent. Varundi exits the crisis with something rare: a clean balance sheet and a world suddenly very interested in African growth stories.
 
 The question is what to do with the recovery.`,
  roles:{
@@ -195,17 +195,17 @@ The question is what to do with the recovery.`,
      ind:{debt:0,wages:-1,rating:1},def:null,score:2}
    ]},
   imf_chief:{
-   briefing:`The emergency facility worked. Kambala's balance sheet is clean and the government is cooperative. Debt-to-GDP at 22% is well below our 55% warning threshold. This is the window: if Kambala builds fiscal buffers now, it can absorb the next commodity shock without crisis. If it borrows heavily against the upswing instead, the next downturn will be severe. The World Bank and Chinese bilateral lenders are both circling.`,
+   briefing:`The emergency facility worked. Varundi's balance sheet is clean and the government is cooperative. Debt-to-GDP at 22% is well below our 55% warning threshold. This is the window: if Varundi builds fiscal buffers now, it can absorb the next commodity shock without crisis. If it borrows heavily against the upswing instead, the next downturn will be severe. The World Bank and Chinese bilateral lenders are both circling.`,
    decision:`Your Article IV consultation is being finalised. Your public assessment will shape the government's borrowing appetite. A positive assessment will be cited to justify loans you may privately regard as excessive.`,
    opts:[
     {id:'A',lbl:'Issue a strong public warning on commodity-linked borrowing',desc:'Make clear that excessive borrowing now constrains future options. Risk souring a cooperative relationship.',
      conseq:'The warning is published. The Finance Ministry pushes back in the press. But three years later, when you need the government to engage honestly about debt levels, they will remember that you told the truth when it mattered.',
      ind:{debt:0,wages:0,rating:0},def:null,score:1},
-    {id:'B',lbl:'Issue a positive assessment, encouraging investment',desc:'Celebrate Kambala\'s recovery. Encourage the growth narrative. Risk: your endorsement is used to justify borrowing you privately doubt.',
-     conseq:'"IMF endorses Kambala\'s growth trajectory," runs the headline. The Finance Minister shows it to every bilateral lender in the next twelve months.',
+    {id:'B',lbl:'Issue a positive assessment, encouraging investment',desc:'Celebrate Varundi\'s recovery. Encourage the growth narrative. Risk: your endorsement is used to justify borrowing you privately doubt.',
+     conseq:'"IMF endorses Varundi\'s growth trajectory," runs the headline. The Finance Minister shows it to every bilateral lender in the next twelve months.',
      ind:{debt:0,wages:0,rating:0},def:'imf_positive',score:-1},
     {id:'C',lbl:'Nuanced assessment — cautiously optimistic with risk caveats',desc:'Technically honest. Practically easy to ignore. The risks are in the annex.',
-     conseq:'Nobody reads the annex. The headline quote — "Kambala\'s recovery is on solid footing" — is reproduced in twelve investor prospectuses over the next two years.',
+     conseq:'Nobody reads the annex. The headline quote — "Varundi\'s recovery is on solid footing" — is reproduced in twelve investor prospectuses over the next two years.',
      ind:{debt:0,wages:0,rating:0},def:'imf_nuanced',score:0}
    ]},
   civil_servant:{
@@ -223,9 +223,9 @@ The question is what to do with the recovery.`,
 },
 
 {id:2, name:'The Boom', years:'2010–2012',
- world:`Chinese demand for copper is driving a global commodity super-cycle. By 2011, copper has reached $10,000 per tonne — more than double its pre-crisis level. Kambala's government revenues are growing faster than any budget forecast predicted. GDP is expanding at 7% a year.
+ world:`Chinese demand for copper is driving a global commodity super-cycle. By 2011, copper has reached $10,000 per tonne — more than double its pre-crisis level. Varundi's government revenues are growing faster than any budget forecast predicted. GDP is expanding at 7% a year.
 
-International banks are calling the Finance Ministry to discuss Kambala's first Eurobond — borrowing directly from international capital markets, in US dollars, at market rates. The financial press has a phrase for this moment: Africa Rising. Kambala is cited in investor roadshows.
+International banks are calling the Finance Ministry to discuss Varundi's first Eurobond — borrowing directly from international capital markets, in US dollars, at market rates. The financial press has a phrase for this moment: Africa Rising. Varundi is cited in investor roadshows.
 
 Nobody is talking about what happens when the copper price falls.`,
  roles:{
@@ -234,7 +234,7 @@ Nobody is talking about what happens when the copper price falls.`,
    decision:`The Eurobond matures in 2022. You will not be Finance Minister in 2022. The question is whether the infrastructure justifies the risk — and whether the risk is yours to take.`,
    opts:[
     {id:'A',lbl:'Issue the full $750m Eurobond',desc:'Fund the entire infrastructure programme. Repayment in 2022 is a future government\'s problem.',
-     conseq:'The Eurobond is oversubscribed at 5.4%. Kambala is on the front page of the Financial Times. The infrastructure programme launches. Copper is still rising.',
+     conseq:'The Eurobond is oversubscribed at 5.4%. Varundi is on the front page of the Financial Times. The infrastructure programme launches. Copper is still rising.',
      ind:{debt:13,wages:4,rating:0},def:'eurobond_full',score:-1},
     {id:'B',lbl:'Issue a smaller $300m Eurobond',desc:'A conservative market entry. Smaller infrastructure programme. Less popular politically but more manageable.',
      conseq:'The Eurobond is issued. The infrastructure programme is scaled back — three projects instead of seven. The President is disappointed. The debt service schedule is not dangerous.',
@@ -244,7 +244,7 @@ Nobody is talking about what happens when the copper price falls.`,
      ind:{debt:2,wages:1,rating:1},def:null,score:2}
    ]},
   imf_chief:{
-   briefing:`Kambala's macro performance is strong. Reserves at 4.2 months. The Eurobond question is live — the Finance Ministry has informally asked our view. Our concerns: bullet maturity means the full amount is repayable at once in ten years; dollar denomination transfers exchange rate risk to the sovereign; and the yields, while low by African standards, are far above concessional rates from multilaterals. But the government sees this as their first step into capital markets.`,
+   briefing:`Varundi's macro performance is strong. Reserves at 4.2 months. The Eurobond question is live — the Finance Ministry has informally asked our view. Our concerns: bullet maturity means the full amount is repayable at once in ten years; dollar denomination transfers exchange rate risk to the sovereign; and the yields, while low by African standards, are far above concessional rates from multilaterals. But the government sees this as their first step into capital markets.`,
    decision:`If you oppose the Eurobond and the government proceeds anyway — which it likely will — you will have spent credibility for nothing. If you support it or stay silent, you are complicit in a risk you believe is real.`,
    opts:[
     {id:'A',lbl:'Formally advise against the Eurobond in writing',desc:'Recommend concessional lending only. The government will be annoyed. They will probably proceed anyway.',
@@ -253,7 +253,7 @@ Nobody is talking about what happens when the copper price falls.`,
     {id:'B',lbl:'Technical note flagging risks — leave the decision to government',desc:'Professional. Non-interventionist. Technically honest. Practically easy to ignore.',
      conseq:'The technical note is filed. The Finance Minister reads the executive summary. The Eurobond proceeds. You have not lied — but you have not been heard.',
      ind:{debt:0,wages:0,rating:0},def:null,score:0},
-    {id:'C',lbl:'Privately support the Eurobond as a sign of market maturity',desc:'The positive signal helps Kambala\'s investor story. You can address debt levels in the next Article IV.',
+    {id:'C',lbl:'Privately support the Eurobond as a sign of market maturity',desc:'The positive signal helps Varundi\'s investor story. You can address debt levels in the next Article IV.',
      conseq:'Your informal support leaks into the investor roadshow materials. The Eurobond is oversubscribed. The Finance Minister is effusive. The Article IV that addresses debt levels is three years away.',
      ind:{debt:0,wages:0,rating:0},def:'imf_supported_bond',score:-1}
    ]},
@@ -272,7 +272,7 @@ Nobody is talking about what happens when the copper price falls.`,
 },
 
 {id:3, name:'The Temptation', years:'2012–2013',
- world:`Copper remains strong, but analysts who pay attention notice Chinese growth is moderating. Kambala's presidential election is six months away. Both major parties have published infrastructure manifestos. The ruling party promises a new university, expanded free healthcare, rural electrification. The opposition promises all of the above plus lower taxes.
+ world:`Copper remains strong, but analysts who pay attention notice Chinese growth is moderating. Varundi's presidential election is six months away. Both major parties have published infrastructure manifestos. The ruling party promises a new university, expanded free healthcare, rural electrification. The opposition promises all of the above plus lower taxes.
 
 Nobody is talking about debt sustainability.
 
@@ -300,7 +300,7 @@ Global interest rates remain at historic lows. African Eurobonds at 5–7% yield
      conseq:'The analysis is published. "Politically motivated," says the Finance Ministry. Three years later, when restructuring is underway, this document will be Exhibit A.',
      ind:{debt:0,wages:0,rating:0},def:null,score:1},
     {id:'B',lbl:'Standard Article IV with risks in the technical annex',desc:'Technically complete. The risks are there — just not on the front page.',
-     conseq:'"Kambala maintains strong growth fundamentals," runs the headline. The downside scenarios are in Table 7 of Annex III. Nobody reads Annex III.',
+     conseq:'"Varundi maintains strong growth fundamentals," runs the headline. The downside scenarios are in Table 7 of Annex III. Nobody reads Annex III.',
      ind:{debt:0,wages:0,rating:0},def:null,score:0},
     {id:'C',lbl:'Delay Article IV publication until after the election',desc:'Unusual but not unprecedented. Avoids a political flashpoint.',
      conseq:'The Article IV is delayed. When published, the concerns look like hindsight rather than warning. The government notes, correctly, that you did not flag this before they acted.',
@@ -321,7 +321,7 @@ Global interest rates remain at historic lows. African Eurobonds at 5–7% yield
 },
 
 {id:4, name:'The Crash', years:'2014–2016',
- world:`Chinese growth is slowing. The copper price begins to fall in late 2014 and does not stop. By early 2016 it is at $4,400 per tonne — down nearly 50% from its peak. Kambala's currency loses 40% of its value against the US dollar in eighteen months.
+ world:`Chinese growth is slowing. The copper price begins to fall in late 2014 and does not stop. By early 2016 it is at $4,400 per tonne — down nearly 50% from its peak. Varundi's currency loses 40% of its value against the US dollar in eighteen months.
 
 Every debt denominated in dollars now costs 40% more to service in local currency than when it was borrowed. This was always the risk. It was always in the models. Nobody planned for it.
 
@@ -349,10 +349,10 @@ The IMF's private projections — not yet published — show debt service consum
      conseq:'The meeting is tense. The Finance Minister is defensive. But within three months, they call back. The precautionary programme begins. The third Eurobond is not issued.',
      ind:{debt:0,wages:0,rating:1},def:null,score:1},
     {id:'B',lbl:'Publish an updated debt sustainability assessment',desc:'The markets will read it. Bond spreads will widen. The government will be furious — and may have to call you.',
-     conseq:'Spreads on Kambala\'s Eurobonds jump 180 basis points overnight. The Finance Minister calls it "interference." They also call you the next morning to discuss a programme.',
+     conseq:'Spreads on Varundi\'s Eurobonds jump 180 basis points overnight. The Finance Minister calls it "interference." They also call you the next morning to discuss a programme.',
      ind:{debt:0,wages:0,rating:-1},def:null,score:0},
     {id:'C',lbl:'Wait for the government to come to you',desc:'Intervening without invitation risks the relationship. Perhaps the situation will stabilise.',
-     conseq:'You wait. The government issues the third Eurobond at 9.25%. Kambala pays twice what it needed to for money it did not need to borrow if it had come to you six months earlier.',
+     conseq:'You wait. The government issues the third Eurobond at 9.25%. Varundi pays twice what it needed to for money it did not need to borrow if it had come to you six months earlier.',
      ind:{debt:0,wages:0,rating:-1},def:null,score:-1}
    ]},
   civil_servant:{
@@ -425,11 +425,11 @@ The IMF has been waiting, as it has waited for two years, for a phone call.`,
 },
 
 {id:6, name:'The Breaking Point', years:'2020–2021',
- world:`In March 2020, the World Health Organisation declares COVID-19 a pandemic. Kambala's copper mines stay open under strict protocols — but the economic shock is severe. Tourism collapses. The informal economy, which employs 60% of urban workers, freezes. Tax revenue falls 22% in three months. Health expenditure requirements surge.
+ world:`In March 2020, the World Health Organisation declares COVID-19 a pandemic. Varundi's copper mines stay open under strict protocols — but the economic shock is severe. Tourism collapses. The informal economy, which employs 60% of urban workers, freezes. Tax revenue falls 22% in three months. Health expenditure requirements surge.
 
-In November 2020, Kambala misses a $42m Eurobond coupon payment. It does not pay within the grace period.
+In November 2020, Varundi misses a $42m Eurobond coupon payment. It does not pay within the grace period.
 
-This is a sovereign default — the first in Kambala's modern history. It was not caused by COVID. COVID was the final weight on a structure that had been weakening for a decade.`,
+This is a sovereign default — the first in Varundi's modern history. It was not caused by COVID. COVID was the final weight on a structure that had been weakening for a decade.`,
  roles:{
   finance_minister:{
    briefing:`The default was not a single decision. It was the accumulated result of ten years of choices — yours, your predecessors', the creditors', the markets'. The coupon could technically have been paid. Doing so would have meant cutting the health budget in the middle of a pandemic. You made the call. Now you are in default. China and France are co-chairing the official creditor committee. The private Eurobond holders — hedge funds in London and New York — are not yet at the table. This will take years.`,
@@ -474,7 +474,7 @@ This is a sovereign default — the first in Kambala's modern history. It was no
 },
 
 {id:7, name:'The Reckoning', years:'2022–2025',
- world:`Russia invades Ukraine in February 2022. Food and fuel prices spike globally. For Kambala, which imports most of its fuel and significant quantities of food, this is another external shock piled onto a restructuring entering its third year.
+ world:`Russia invades Ukraine in February 2022. Food and fuel prices spike globally. For Varundi, which imports most of its fuel and significant quantities of food, this is another external shock piled onto a restructuring entering its third year.
 
 The G20 Common Framework negotiations are in impasse: China and Paris Club creditors cannot agree on burden-sharing. Private bondholders demand treatment comparable to official creditors before accepting haircuts.
 
@@ -489,7 +489,7 @@ The cycle may be beginning again.`,
     {id:'A',lbl:'Write an honest speech — acknowledge what went wrong and what structural reforms are needed',desc:'Name the cycle. Describe the constraints. Commit to changes.',
      conseq:'The speech is widely quoted. Uncomfortable in parts. Your opponents use those parts against you. International creditors cite it as evidence of seriousness. Three years later it is assigned reading in a university course on political economy.',
      ind:{debt:-2,wages:1,rating:1},def:null,score:2},
-    {id:'B',lbl:'Write a triumphalist speech — Kambala is back, the future is bright',desc:'The politics demand optimism. The cycle is not your problem to solve.',
+    {id:'B',lbl:'Write a triumphalist speech — Varundi is back, the future is bright',desc:'The politics demand optimism. The cycle is not your problem to solve.',
      conseq:'The speech lands well domestically. International investors receive it politely. The structural conditions that produced the crisis remain unreformed. The copper price is high. Things feel, for now, like 2010.',
      ind:{debt:0,wages:0,rating:0},def:null,score:0},
     {id:'C',lbl:'Attribute the crisis primarily to external factors — commodity crash, COVID, Ukraine',desc:'Not wrong. Incomplete.',
@@ -498,7 +498,7 @@ The cycle may be beginning again.`,
    ]},
   imf_chief:{
    briefing:`The programme worked in the technical sense: debt is sustainable again. Reforms were partially implemented. The human cost was severe — real wages in the public sector fell 35%; health and education spending as a share of GDP is lower in 2025 than in 2019. The copper recovery masked structural problems. The narrative is contested: some will say the IMF's conditions were essential; others will say they deepened the humanitarian cost of a crisis the IMF's own earlier assessments failed to prevent. Both statements contain truth.`,
-   decision:`You are leaving Kambala. You will write a final report. What you say about the IMF's own role will shape whether anything changes.`,
+   decision:`You are leaving Varundi. You will write a final report. What you say about the IMF's own role will shape whether anything changes.`,
    opts:[
     {id:'A',lbl:'Commission an internal review of the IMF\'s role, including early assessments',desc:'Were the 2009 and 2013 assessments adequate? The question has an uncomfortable answer.',
      conseq:'The review is commissioned. It finds that public communications understated risks that were flagged internally. The finding is published as a "learning note." It is cited in the next Article IV for a different country.',
@@ -506,7 +506,7 @@ The cycle may be beginning again.`,
     {id:'B',lbl:'Publish standard post-programme assessment — targets met, move on',desc:'The programme met its benchmarks. That is the metric.',
      conseq:'The assessment is filed. It is accurate within its frame. The question of whether the frame was adequate is not asked. The file is closed. The next mission begins.',
      ind:{debt:0,wages:0,rating:0},def:null,score:0},
-    {id:'C',lbl:'Advocate within the IMF for structural reforms to the debt restructuring process',desc:'Use the Kambala case to push for faster timelines and stronger social protection floors.',
+    {id:'C',lbl:'Advocate within the IMF for structural reforms to the debt restructuring process',desc:'Use the Varundi case to push for faster timelines and stronger social protection floors.',
      conseq:'You write the advocacy paper. It circulates internally for two years before finding its way into a G20 working group document. Reform is slow. It is not nothing.',
      ind:{debt:0,wages:0,rating:0},def:null,score:1}
    ]},
@@ -547,15 +547,15 @@ The accumulation of those decisions produced a debt crisis that took 3.5 years t
   high:{title:'The Honest Broker',
    text:`You warned when warning was uncomfortable. You held programme conditions when holding them was unpopular. You commissioned the review that asked what the IMF got wrong. None of this made you loved.
 
-The question you carry is whether the institution you represented — with its preferred creditor status, its conditionality toolkit, and its models — is structurally suited to the problem it is supposed to solve. You helped Kambala restructure. You did not help it not need to restructure. Those are different things. The gap between them is the space where better international architecture would have to go.`},
+The question you carry is whether the institution you represented — with its preferred creditor status, its conditionality toolkit, and its models — is structurally suited to the problem it is supposed to solve. You helped Varundi restructure. You did not help it not need to restructure. Those are different things. The gap between them is the space where better international architecture would have to go.`},
   mid:{title:'The Instrument',
    text:`You applied the tools you had to the problem in front of you. Sometimes they worked. Sometimes the timing was wrong, or the conditionality was too rigid, or the projections were too optimistic. The programme closed on schedule. The metrics were met.
 
 What happens inside the metrics — the nurses who left, the procurement systems that broke, the years of reduced social spending — these appear in the annexes of your reports. Whether they should appear somewhere more prominent is a question the institution has not yet fully answered.`},
   low:{title:'Complicity and Constraint',
-   text:`In retrospect, the 2009 assessment was too optimistic. The 2013 Article IV buried its warnings. The delay before the 2016 programme cost Kambala two years and a third Eurobond at 9% yield.
+   text:`In retrospect, the 2009 assessment was too optimistic. The 2013 Article IV buried its warnings. The delay before the 2016 programme cost Varundi two years and a third Eurobond at 9% yield.
 
-These are institutional failures as much as personal ones. The IMF operates within incentive structures — preferred creditor status, member government politics, the need to maintain relationships with borrowers — that do not always align with frank advice. You were an instrument of those structures as well as a professional operating within them. The Kambala case is now a case study. Whether your successors draw the right lessons from it depends, in part, on how honestly the post-programme assessment describes what happened.`}
+These are institutional failures as much as personal ones. The IMF operates within incentive structures — preferred creditor status, member government politics, the need to maintain relationships with borrowers — that do not always align with frank advice. You were an instrument of those structures as well as a professional operating within them. The Varundi case is now a case study. Whether your successors draw the right lessons from it depends, in part, on how honestly the post-programme assessment describes what happened.`}
  },
  civil_servant:{
   high:{title:'The System Holds — Barely',
@@ -631,8 +631,8 @@ function showPrologue(){
   <div class="card">
    <div class="sub">The Copperbelt Republic &mdash; Before We Begin</div>
    <h2 style="margin-bottom:.8rem">2007. A Clean Slate.</h2>
-   <p>Three years ago, something unprecedented happened. Kambala completed the HIPC debt relief programme. Decades of debt — the legacy of loans taken by governments long gone, for infrastructure never completed, at rates no commodity boom could service — were cancelled. Written off. Gone.</p>
-   <p>Kambala emerged with a balance sheet cleaner than it had been since independence. The IMF called it "a new chapter." The Finance Minister called it "a fresh start." Roads were being built. Schools were opening in districts that had not seen a functioning classroom in a decade.</p>
+   <p>Three years ago, something unprecedented happened. Varundi completed the HIPC debt relief programme. Decades of debt — the legacy of loans taken by governments long gone, for infrastructure never completed, at rates no commodity boom could service — were cancelled. Written off. Gone.</p>
+   <p>Varundi emerged with a balance sheet cleaner than it had been since independence. The IMF called it "a new chapter." The Finance Minister called it "a fresh start." Roads were being built. Schools were opening in districts that had not seen a functioning classroom in a decade.</p>
    <p>It is 2007. You are about to begin in 2008 — the year everything changed.</p>
    <p><em>Remember this moment. You will want to remember it.</em></p>
   </div>
