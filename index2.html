@@ -1,0 +1,1486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Varundi — A Mineral Economy</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1a2744;--gold:#c8962d;--teal:#2a7d6b;--burg:#7d2a3a;
+  --light:#f5f3ef;--mid:#e0dbd2;--text:#2c2c2c;--muted:#666;
+  --shadow:0 2px 10px rgba(0,0,0,0.10);
+}
+body{font-family:Georgia,serif;background:var(--light);color:var(--text);min-height:100vh;line-height:1.75}
+p+p{margin-top:.8em}
+header{background:var(--navy);color:#fff;padding:1rem 1.5rem;position:sticky;top:0;z-index:200;
+  display:flex;justify-content:space-between;align-items:center;box-shadow:var(--shadow)}
+header h1{font-size:1.05rem;font-weight:normal;letter-spacing:.04em;cursor:pointer}
+header h1:hover em{text-decoration:underline;text-underline-offset:3px}
+header h1 em{font-style:italic;color:var(--gold)}
+.header-right{display:flex;gap:.6rem;align-items:center}
+.dots{display:flex;gap:5px;align-items:center}
+.dot{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.25);transition:background .3s}
+.dot.done{background:rgba(255,255,255,.6)}
+.dot.now{background:var(--gold)}
+.notes-toggle-btn{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.3);
+  border-radius:5px;padding:.3rem .75rem;font-size:.78rem;font-family:sans-serif;cursor:pointer;
+  letter-spacing:.04em;transition:background .2s}
+.notes-toggle-btn:hover{background:rgba(255,255,255,.22)}
+.notes-toggle-btn.active{background:var(--gold);border-color:var(--gold);color:#fff}
+.notes-panel{position:fixed;top:0;right:0;height:100vh;width:360px;max-width:95vw;
+  background:#fff;box-shadow:-4px 0 24px rgba(0,0,0,.18);z-index:300;
+  display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s ease}
+.notes-panel.open{transform:translateX(0)}
+.notes-header{background:var(--navy);color:#fff;padding:.9rem 1.1rem;
+  display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.notes-header span{font-size:.95rem;letter-spacing:.04em}
+.notes-close{background:none;border:none;color:#fff;font-size:1.3rem;cursor:pointer;line-height:1;padding:.1rem .3rem}
+.notes-body{overflow-y:auto;flex:1;padding:1rem}
+.notes-round{margin-bottom:1.2rem}
+.notes-round-label{font-family:sans-serif;font-size:.68rem;text-transform:uppercase;
+  letter-spacing:.1em;color:var(--muted);margin-bottom:.4rem;padding-bottom:.3rem;
+  border-bottom:1px solid var(--mid)}
+.notes-round textarea{width:100%;min-height:80px;border:1px solid var(--mid);border-radius:5px;
+  padding:.6rem .75rem;font-family:Georgia,serif;font-size:.84rem;color:var(--text);
+  line-height:1.6;resize:vertical;background:#fdfcfa}
+.notes-round textarea:focus{outline:none;border-color:var(--navy)}
+.notes-empty{font-size:.85rem;color:var(--muted);font-style:italic;padding:.5rem 0}
+.notes-hint{font-size:.75rem;color:var(--muted);font-style:italic;margin-top:.6rem;line-height:1.5}
+main{max-width:760px;margin:1.8rem auto;padding:0 1.25rem}
+.card{background:#fff;border-radius:8px;padding:1.5rem;box-shadow:var(--shadow);margin-bottom:1.4rem}
+.card h2{font-size:1.45rem;color:var(--navy);margin-bottom:.3rem}
+.sub{font-size:.75rem;font-family:sans-serif;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-bottom:.35rem}
+.years{font-size:.85rem;font-style:italic;color:var(--muted);margin-bottom:1rem}
+.slabel{font-size:.7rem;font-family:sans-serif;text-transform:uppercase;letter-spacing:.1em;
+  padding-bottom:.45rem;border-bottom:2px solid;margin-bottom:.85rem}
+.slabel.world{color:var(--navy);border-color:var(--navy)}
+.slabel.brief{border-color:currentColor}
+.slabel.dec{color:#777;border-color:#ddd}
+.dashboard{background:var(--navy);border-radius:8px;padding:1.2rem 1.5rem;margin-bottom:1.4rem;
+  box-shadow:var(--shadow)}
+.dash-title{font-size:.68rem;font-family:sans-serif;text-transform:uppercase;letter-spacing:.1em;
+  color:rgba(255,255,255,.5);margin-bottom:1rem}
+.dash-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
+.dash-item{background:rgba(255,255,255,.06);border-radius:6px;padding:.85rem 1rem}
+.dash-label{font-size:.68rem;font-family:sans-serif;text-transform:uppercase;letter-spacing:.08em;
+  color:rgba(255,255,255,.5);margin-bottom:.4rem}
+.dash-value{font-size:1.5rem;font-weight:bold;line-height:1;margin-bottom:.5rem}
+.dash-value.ok{color:#6bcb77}
+.dash-value.warn{color:#ffd93d}
+.dash-value.bad{color:#ff6b6b}
+.dash-bar-bg{background:rgba(255,255,255,.1);border-radius:100px;height:5px;margin-top:.4rem}
+.dash-bar-fill{height:5px;border-radius:100px;transition:width .5s ease}
+.dash-bar-fill.ok{background:#6bcb77}
+.dash-bar-fill.warn{background:#ffd93d}
+.dash-bar-fill.bad{background:#ff6b6b}
+.dash-sublabel{font-size:.65rem;color:rgba(255,255,255,.4);margin-top:.3rem;font-family:sans-serif}
+.rtag{display:inline-block;font-size:.68rem;font-family:sans-serif;text-transform:uppercase;
+  letter-spacing:.08em;padding:.18rem .55rem;border-radius:100px;margin-bottom:.6rem}
+.opts{display:flex;flex-direction:column;gap:.7rem;margin-top:.9rem}
+.opt{text-align:left;background:#fff;border:2px solid var(--mid);border-radius:7px;
+  padding:.9rem 1.1rem;cursor:pointer;width:100%;transition:all .18s;font-family:Georgia,serif}
+.opt:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.1)}
+.opt:disabled{cursor:default}
+.opt .letter{display:inline-flex;align-items:center;justify-content:center;
+  width:20px;height:20px;border-radius:50%;background:var(--mid);
+  font-family:sans-serif;font-weight:bold;font-size:.72rem;margin-right:.45rem;flex-shrink:0}
+.opt .lbl{font-weight:bold;font-size:.92rem}
+.opt .odesc{font-size:.83rem;color:var(--muted);margin-top:.3rem;margin-left:26px;line-height:1.5}
+.opt.chosen{opacity:1!important}
+.cbox{display:none;background:#fffbef;border:1px solid #dfc97a;border-radius:7px;
+  padding:1.1rem 1.25rem;margin-top:1rem}
+.cbox.show{display:block}
+.clabel{font-size:.7rem;font-family:sans-serif;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--gold);margin-bottom:.4rem}
+.defalert{background:#fff8e1;border:1px solid #d4b800;border-radius:7px;
+  padding:.9rem 1.1rem;margin-bottom:1rem;font-size:.88rem;line-height:1.6}
+.defalert .dlabel{font-size:.68rem;font-family:sans-serif;text-transform:uppercase;
+  letter-spacing:.1em;color:#8a7000;margin-bottom:.3rem}
+.btn{display:block;margin:1.5rem auto 0;padding:.85rem 2.2rem;
+  background:var(--navy);color:#fff;border:none;border-radius:6px;
+  font-family:sans-serif;font-size:.95rem;cursor:pointer;transition:background .2s}
+.btn:hover{background:#2a3d6e}
+.btn-outline{background:#fff;color:var(--navy);border:2px solid var(--navy)}
+.btn-outline:hover{background:var(--navy);color:#fff}
+.btn-sm{padding:.55rem 1.3rem;font-size:.82rem;margin:0}
+.back-btn{display:inline-flex;align-items:center;gap:.3rem;background:none;border:none;
+  color:var(--muted);font-family:sans-serif;font-size:.8rem;cursor:pointer;
+  padding:.3rem 0;margin-bottom:1rem;letter-spacing:.03em;transition:color .15s}
+.back-btn:hover{color:var(--navy)}
+.back-btn::before{content:'←';font-size:.9rem}
+.rgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.2rem;margin-top:1.5rem}
+.rcard{background:#fff;border-radius:8px;padding:1.35rem;box-shadow:var(--shadow);
+  cursor:pointer;border:3px solid transparent;transition:all .2s}
+.rcard:hover{transform:translateY(-3px);box-shadow:0 6px 18px rgba(0,0,0,.13)}
+.rcard .rname{font-size:.95rem;font-weight:bold;margin-bottom:.4rem}
+.rcard .rdesc{font-size:.82rem;color:var(--muted);line-height:1.5}
+.trail{background:var(--light);border-radius:6px;padding:1rem 1.1rem;margin-top:1.4rem;font-size:.84rem}
+.trail .tlabel{font-family:sans-serif;font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.5rem}
+.titem{display:flex;gap:.6rem;margin-bottom:.35rem;line-height:1.45;align-items:baseline}
+.titem.clickable{cursor:pointer;border-radius:4px;padding:.3rem .4rem;margin:-.3rem -.4rem .05rem;transition:background .15s}
+.titem.clickable:hover{background:rgba(26,39,68,.08)}
+.tphase{color:var(--muted);white-space:nowrap;flex-shrink:0;font-family:sans-serif;font-size:.8rem}
+.treview{font-size:.7rem;color:var(--navy);font-family:sans-serif;margin-left:auto;opacity:.6;flex-shrink:0}
+.titem.clickable:hover .treview{opacity:1}
+.reflection-card{background:#f8f6f2;border:1px solid var(--mid);border-radius:8px;
+  padding:1.4rem 1.5rem;margin-bottom:1.4rem}
+.reflection-card h3{font-size:1rem;color:var(--navy);margin-bottom:1.1rem;font-weight:bold}
+.reflect-q{margin-bottom:1.2rem}
+.reflect-q label{display:block;font-size:.88rem;color:var(--text);margin-bottom:.4rem;line-height:1.6}
+.reflect-q label em{color:var(--muted)}
+.reflect-q textarea{width:100%;min-height:75px;border:1px solid var(--mid);border-radius:5px;
+  padding:.6rem .75rem;font-family:Georgia,serif;font-size:.84rem;line-height:1.6;
+  color:var(--text);resize:vertical;background:#fff}
+.reflect-q textarea:focus{outline:none;border-color:var(--navy)}
+.tip{border-bottom:1.5px dashed var(--gold);cursor:help;position:relative;color:inherit}
+.tip:hover .tip-box{display:block}
+.tip-box{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);
+  width:260px;background:#1a2744;color:#fff;font-size:.76rem;line-height:1.55;
+  padding:.65rem .85rem;border-radius:6px;z-index:500;pointer-events:none;
+  box-shadow:0 4px 16px rgba(0,0,0,.3);font-family:sans-serif;font-style:normal;font-weight:normal}
+.tip-box::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);
+  border:5px solid transparent;border-top-color:#1a2744}
+.disclaimer{background:#edeae4;border-top:1px solid #d4cfc7;padding:.85rem 1.5rem;
+  text-align:center;font-size:.73rem;color:var(--muted);font-family:sans-serif;
+  line-height:1.65;margin-top:2rem}
+@media(max-width:620px){
+  main{padding:0 .9rem}.card{padding:1.1rem}header{padding:.8rem 1rem}
+  .dash-grid{grid-template-columns:repeat(2,1fr);gap:.5rem}
+  .dash-item{padding:.65rem .7rem}
+  .dash-value{font-size:1.2rem}
+  .notes-panel{width:100vw}
+  .rgrid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:420px){
+  .rgrid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1 onclick="if(S.screen!=='prologue'){reset()}" title="Return to home"><em>Varundi</em> &mdash; A Mineral Economy</h1>
+  <div class="header-right">
+    <button class="notes-toggle-btn" id="notes-btn" onclick="toggleNotes()">&#128221; Notes</button>
+    <div class="dots" id="dots"></div>
+  </div>
+</header>
+<div class="notes-panel" id="notes-panel">
+  <div class="notes-header">
+    <span>&#128221; Your Notes</span>
+    <button class="notes-close" onclick="toggleNotes()">&#xd7;</button>
+  </div>
+  <div class="notes-body" id="notes-body">
+    <p class="notes-empty">Notes will appear here as you progress through each round.</p>
+  </div>
+</div>
+<div id="ibar" style="display:none"></div>
+<main id="main"></main>
+<div class="disclaimer">This simulation was built with AI assistance. AI tools can introduce errors in facts, figures, and economic dynamics. Do not rely on the specific details here &mdash; consult your class readings and other reputable sources for accurate information on sovereign debt, the IMF, and development finance.</div>
+<script>
+// ─── GLOSSARY ───────────────────────────────────────────────────────────────
+const GLOSSARY = {
+  'Article IV consultation': 'An annual economic assessment the IMF conducts of a member country\'s economic and financial policies, required under Article IV of the IMF\'s Articles of Agreement. The published assessment shapes market perceptions.',
+  'Article IV': 'An annual economic assessment the IMF conducts of a member country\'s economic and financial policies. The published assessment shapes market perceptions and borrowing costs.',
+  'Eurobond': 'A bond issued by a government in a foreign currency (typically US dollars) and sold to international investors. Dollar-denominated debt transfers exchange rate risk to the sovereign borrower — if the local currency weakens, repayment costs rise sharply.',
+  'Eurobonds': 'Bonds issued by a government in a foreign currency (typically US dollars) and sold to international investors. Dollar-denominated debt transfers exchange rate risk to the sovereign borrower.',
+  'HIPC': 'Heavily Indebted Poor Countries initiative — a joint IMF/World Bank programme providing debt relief to qualifying low-income countries that meet conditions for economic reform.',
+  'debt-to-GDP': 'The ratio of government total debt to gross domestic product, used as a key indicator of debt sustainability. The IMF\'s warning threshold for low-income countries is typically 55%.',
+  'concessional': 'Below-market interest rates, typically offered by multilateral institutions like the World Bank, often with long repayment periods and tied to reform conditions.',
+  'bullet repayment': 'A debt structure where the entire principal is repaid in a single payment at maturity rather than in instalments — concentrating refinancing risk at one point.',
+  'bullet maturity': 'A debt structure where the entire principal is repaid in a single payment at maturity rather than in instalments — concentrating refinancing risk at one point.',
+  'credit rating': 'An assessment of a borrower\'s creditworthiness by agencies such as Moody\'s, S&P, or Fitch, affecting borrowing costs. Investment grade begins at BBB−. Below BB+ is speculative ("junk") territory.',
+  'G20 Common Framework': 'A 2020 G20 initiative for coordinating debt restructuring for low-income countries, involving both Paris Club and non-Paris Club creditors including China. In practice it has moved slowly — Zambia\'s case took over three years.',
+  'debt sustainability': 'The capacity of a government to service its debt without requiring exceptional financing or accumulating arrears — assessed through IMF/World Bank Debt Sustainability Analysis models.',
+  'Extended Credit Facility': 'An IMF lending instrument providing medium-term support to low-income countries facing persistent balance of payments problems, at concessional interest rates.',
+  'Paris Club': 'An informal group of creditor governments — primarily Western countries — that coordinates rescheduling of bilateral debt owed to its members.',
+  'primary surplus': 'A government budget balance excluding interest payments on debt. Achieving a primary surplus means revenues exceed non-interest spending — a key condition in most IMF programmes.',
+  'contingent liabilities': 'Potential government obligations that may arise from future events, such as guarantees on state-owned enterprise debt — often kept off official balance sheets, obscuring true fiscal exposure.',
+  'commodity super-cycle': 'An extended period of high commodity prices driven by structural shifts in global demand, typically associated with rapid industrialisation — most recently Chinese growth in the 2000s.',
+  'copper super-cycle': 'An extended period of high copper prices driven by structural shifts in global demand, associated with Chinese industrialisation in the 2000s.',
+  'sovereign default': 'A failure by a national government to meet its debt obligations — missing a payment or restructuring terms against creditors\' wishes. Triggers credit rating downgrades and loss of market access.',
+  'debt restructuring': 'A process by which a government negotiates new terms for outstanding debt — involving haircuts (reductions in principal), extended maturities, or reduced interest rates.',
+  'IMF programme': 'A financial arrangement between the IMF and a member country providing balance of payments support in exchange for agreed economic policy conditions (conditionality).',
+  'precautionary programme': 'An IMF arrangement a country activates in advance of a crisis to signal commitment to sound policies and provide a financial backstop, without necessarily drawing on the funds.',
+  'basis points': 'A unit of measurement for interest rates: 1 basis point = 0.01%. 180 basis points = 1.8 percentage points. Bond spreads measure the premium above a risk-free benchmark rate.',
+  'coupon': 'A regular interest payment on a bond. Missing a coupon payment triggers a default.',
+  'haircut': 'A reduction in the face value of debt agreed during restructuring — creditors accept receiving less than the full amount they are owed.',
+  'original sin': 'The inability of a developing country to borrow internationally in its own currency, forcing it to issue dollar-denominated debt. When the local currency weakens, all dollar debt becomes more expensive in local terms — a structural fragility, not a result of individual mismanagement.',
+  'hard currency': 'A currency widely accepted in international trade and investment — typically the US dollar, euro, or pound sterling. Varundi\'s kwacha is a soft currency: it cannot be used to borrow internationally, forcing dollar denomination and the associated exchange rate risk.',
+  'RMB swap': 'A bilateral currency swap arrangement between a central bank and China\'s People\'s Bank of China (PBoC), providing access to renminbi liquidity. Kenya activated a $1.5bn PBoC swap line in 2023. Swap lines ease pressure on dollar reserves but RMB is not fully convertible, limiting practical utility.',
+  'foreign exchange reserves': 'Holdings of foreign currencies (primarily US dollars) and gold maintained by a central bank. A conventional minimum is 3 months of import cover — below this, a country may struggle to service foreign-currency debt or pay for essential imports during a crisis.',
+  'import cover': 'The number of months a country could pay for its current level of imports using its existing foreign exchange reserves, without any new export earnings. Three months is the conventional minimum buffer; below 1.5 months signals acute vulnerability.',
+};
+
+function tipify(text) {
+  const terms = Object.keys(GLOSSARY).sort((a,b) => b.length - a.length);
+  const slots = [];
+  for (const term of terms) {
+    const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp('(?<![\\w\\-])(' + escaped + ')(?![\\w\\-])', 'i');
+    if (regex.test(text)) {
+      const def = GLOSSARY[term].replace(/'/g,'&#39;').replace(/"/g,'&quot;');
+      const ph = '\x01' + slots.length + '\x01';
+      text = text.replace(regex, (match) => {
+        slots.push('<span class="tip">' + match + '<span class="tip-box">' + def + '</span></span>');
+        return ph;
+      });
+    }
+  }
+  return text.replace(/\x01(\d+)\x01/g, (_, i) => slots[Number(i)]);
+}
+
+// ─── COPPER PRICE CHART ─────────────────────────────────────────────────────
+const CPR=[
+  {y:2003,p:1780},{y:2004,p:2870},{y:2005,p:3680},{y:2006,p:6740},{y:2007,p:7120},
+  {y:2008,p:6950},{y:2009,p:5130},{y:2010,p:7550},{y:2011,p:8800},{y:2012,p:7960},
+  {y:2013,p:7330},{y:2014,p:6860},{y:2015,p:5490},{y:2016,p:4860},{y:2017,p:6170},
+  {y:2018,p:6530},{y:2019,p:6000},{y:2020,p:6180},{y:2021,p:9350},{y:2022,p:8820},
+  {y:2023,p:8500},{y:2024,p:9500}
+];
+function copperChart(fromY,toY,note){
+  const data=CPR.filter(d=>d.y>=fromY&&d.y<=toY);
+  if(data.length<2)return'';
+  const W=500,H=130,pl=42,pr=14,pt=8,pb=26;
+  const iW=W-pl-pr,iH=H-pt-pb;
+  const maxP=12000;
+  const minY=data[0].y,maxY=data[data.length-1].y;
+  const xf=y=>pl+(y-minY)/(maxY-minY)*iW;
+  const yf=p=>pt+iH-(p/maxP)*iH;
+  const pts=data.map(d=>`${xf(d.y).toFixed(1)},${yf(d.p).toFixed(1)}`);
+  const pth='M'+pts.join('L');
+  const fill=pth+`L${xf(maxY).toFixed(1)},${(pt+iH).toFixed(1)}L${pl},${(pt+iH).toFixed(1)}Z`;
+  let g='',yl='',xl='';
+  [3000,6000,9000,12000].forEach(p=>{
+    const yy=yf(p).toFixed(1);
+    g+=`<line x1="${pl}" x2="${W-pr}" y1="${yy}" y2="${yy}" stroke="rgba(255,255,255,.08)" stroke-dasharray="3,3"/>`;
+    yl+=`<text x="${pl-4}" y="${(yf(p)+4).toFixed(1)}" text-anchor="end" fill="rgba(255,255,255,.4)" font-size="9" font-family="sans-serif">$${p/1000}k</text>`;
+  });
+  data.forEach((d,i)=>{
+    if(i===0||i===data.length-1||d.y%2===0)
+      xl+=`<text x="${xf(d.y).toFixed(1)}" y="${H-3}" text-anchor="middle" fill="rgba(255,255,255,.4)" font-size="9" font-family="sans-serif">${d.y}</text>`;
+  });
+  return`<div style="background:var(--navy);border-radius:6px;padding:.7rem .9rem;margin-top:1rem">
+  <div style="font-size:.63rem;font-family:sans-serif;text-transform:uppercase;letter-spacing:.09em;color:rgba(255,255,255,.4);margin-bottom:.35rem">LME Copper — indicative USD/tonne${note?` · ${note}`:''}</div>
+  <svg viewBox="0 0 ${W} ${H}" style="width:100%;max-height:130px;display:block">
+    ${g}${yl}${xl}
+    <path d="${fill}" fill="rgba(200,150,45,.18)"/>
+    <path d="${pth}" fill="none" stroke="#c8962d" stroke-width="2.5" stroke-linejoin="round"/>
+  </svg>
+  <div style="font-size:.62rem;color:rgba(255,255,255,.3);font-family:sans-serif;margin-top:.25rem;text-align:right">Indicative — verify against primary data</div>
+  </div>`;
+}
+
+// ─── CONSTANTS ───────────────────────────────────────────────────────────────
+const RATINGS = ['D','CCC','CCC+','B-','B','B+','BB-','BB','BB+','BBB-'];
+const RATING_START = 7; // BB
+// Automatic FX reserves change when entering each phase (background macro environment)
+const PHASE_RESERVES = [0, 0, 1.2, 0.3, -1.8, -0.7, -0.5, 1.0];
+
+const ROLES = {
+  finance_minister:{
+    name:'Finance Minister',
+    desc:'You control the budget, negotiate with creditors, and answer to the President. Every choice narrows or widens the options of everyone else.',
+    color:'#1a2744', bg:'#e8edf5'
+  },
+  imf_chief:{
+    name:'IMF Mission Chief',
+    desc:'You arrive twice a year with a briefcase of data and a programme of conditions. You believe in what you are doing. You do not live with the consequences.',
+    color:'#7d2a3a', bg:'#f5e8ea'
+  },
+  civil_servant:{
+    name:'Urban Civil Servant',
+    desc:'You process drug procurement orders for the Ministry of Health. You are on the formal payroll — luckier than most. You do not attend the debt meetings. You feel their results every month.',
+    color:'#2a7d6b', bg:'#e8f3f0'
+  },
+  opposition_leader:{
+    name:'Opposition Leader',
+    desc:'You sit across the aisle from the decisions being made. You have information, warnings, and no executive power. What you do with that combination will define your legacy — and Varundi\'s.',
+    color:'#5a2d82', bg:'#f0e8f8'
+  },
+  chinexim:{
+    name:'China Exim Bank',
+    desc:'You finance the roads, stadiums, and railways. You bring capital without conditions — or so the headline says. The fine print contains its own logic, and you must answer to Beijing as much as to Varundi.',
+    color:'#8b1c1c', bg:'#f5e8e8'
+  },
+  farmer:{
+    name:'Smallholder Farmer',
+    desc:'You farm 12 hectares near the railway line in Varundi\'s central province. You did not choose the exchange rate. You did not sign the Eurobond. You live inside the consequences of both.',
+    color:'#4a7a3d', bg:'#e8f3e5'
+  }
+};
+
+// ─── DEFERRED EFFECTS ────────────────────────────────────────────────────────
+const DEF = {
+  chinese_debt:{phase:4,text:'The road loans signed in 2009 are entering their peak debt service window — at exactly the moment copper revenues have collapsed. Currency depreciation has made these dollar-denominated payments 40% more expensive in local terms than when you signed them.'},
+  both_debt:{phase:4,text:'The combined World Bank and Chinese loans from 2009 — individually justifiable, together heavy — are entering their peak repayment period at the worst possible moment.'},
+  eurobond_full:{phase:5,text:'The $750m Eurobond issued in 2012 is approaching maturity. Refinancing it in the current market — with Varundi\'s credit rating at B- — will cost twice what the original borrowing did. The bill for 2012\'s optimism has arrived.'},
+  eurobond_small:{phase:5,text:'The $300m Eurobond from 2012 is approaching maturity. It is manageable — smaller than the full issuance, and the fiscal position, while strained, is not desperate.'},
+  imf_positive:{phase:4,text:'Your 2009 Article IV — which celebrated Varundi\'s growth trajectory — is being cited by the Finance Ministry as evidence that the IMF itself endorsed the borrowing strategy it now criticises.'},
+  imf_nuanced:{phase:4,text:'Your 2009 assessment is being quoted selectively: the optimistic headline, not the caveats in the annex. You wrote the caveats. Nobody read them.'},
+  imf_supported_bond:{phase:4,text:'Your informal endorsement of the 2012 Eurobond has resurfaced in the government\'s public defence of its borrowing strategy. You are cited in a press release you did not approve.'},
+  high_wages:{phase:5,text:'The 15% wage increase won in 2011 has become a fixed cost that cannot be cut without triggering a constitutional challenge. In the current fiscal squeeze, it is consuming budget space that should go to drug procurement.'},
+  procurement_crisis:{phase:5,text:'The vendor payment backlog handled informally in 2013 never cleared. Three vendors have stopped supplying the Ministry of Health. The drug stockout making headlines this week is five years of informal promises compounding.'},
+  double_down:{phase:5,text:'The 2013 Eurobond and Chinese stadium loan — taken together at the peak of the boom — have produced a debt service schedule consuming 31% of government revenue. The fiscal mathematics have become unworkable.'},
+  third_eurobond:{phase:6,text:'The third Eurobond — issued in 2016 at 9.25% to avoid the IMF — is now the single most expensive item in the debt service schedule. The money saved by avoiding the IMF programme has cost twice as much in additional interest.'},
+  imf_delayed:{phase:5,text:'The delayed Article IV from 2013 is being used by the Finance Ministry as evidence that the IMF knew about the debt trajectory and said nothing. They are not entirely wrong.'},
+  emigration_pending:{phase:6,text:'The UK registration you began in 2016 was approved in 2017. You did not act on it then. The approval letter is in your desk drawer. The salary has not been paid in six weeks.'},
+  imf_rejected:{phase:6,text:'The bilateral deal with China that seemed like an alternative to an IMF programme has not delivered. Private bondholders — owed to hedge funds, not covered by the bilateral arrangement — have missed a coupon. The default clock is running.'},
+  left_system:{phase:7,text:'The institutional memory lost through departures during the crisis years is only now becoming visible. The 2024 graduate cohort is technically trained but has nobody to teach them how the system actually works in practice.'},
+  staff_left:{phase:4,text:'The drug stockout that began last month is linked in part to the procurement knowledge that left with your predecessor. The system they built was not documented. It lived only in their head.'},
+  opp_election_call:{phase:5,text:'The infrastructure promises you made in the 2013 manifesto are now being quoted back at you in Parliament as you try to oppose the government\'s fiscal policies. The line between opposition and complicity is harder to draw when your own platform included a stadium.'},
+  opp_on_record:{phase:6,text:'The parliamentary motion you filed in 2016 produced a court-compelled debt sustainability analysis. When published in 2020, it becomes a primary document in the IMF programme\'s legitimacy case. You were on record. That matters.'},
+  opp_warned:{phase:6,text:'Your 2016 press conference calling for the Finance Minister\'s resignation is now the most-viewed political video in Varundi\'s history. The Finance Minister is still in post.'},
+  chinexim_boom_loans:{phase:4,text:'The budget support facility provided through a state enterprise structure has matured at commercial rates. It now sits in the restructuring pile — and is the most awkward instrument, having been structured partly to stay off official debt statistics.'},
+  chinexim_acceleration:{phase:6,text:'The Finance Ministry has made public our refusal to grant a grace period in 2016, citing it as a factor in the cash crisis. In the restructuring negotiations, our opening position carries less goodwill than it might otherwise have.'},
+  chinexim_bilateral:{phase:7,text:'The infrastructure concessions secured during the restructuring — port access rights, preferential bidding on three projects — have come to the attention of the new government\'s debt audit committee. They are reviewing whether the terms constituted state capture or legitimate commercial negotiation.'},
+  farmer_debt:{phase:6,text:'The short-term loan taken in 2015 to cover input costs was rolled over twice. It now carries compound interest at 18% annually. In a year when government support has vanished and markets are disrupted, this is the primary financial stress in the household.'},
+  farmer_subsidy:{phase:5,text:'Full reliance on the fertiliser subsidy — now removed as an IMF condition — has left you exposed. The sudden removal is more damaging than a gradual phase-out would have been. Production costs have risen 45% in a single season.'},
+  farmer_displacement:{phase:7,text:'The sale in 2018 was rational given the circumstances. From the city, three years later, the land you left is now part of a 400-hectare Chinese agricultural company lease. Whether this is development or displacement depends on who is telling the story.'},
+};
+
+// ─── PHASES ──────────────────────────────────────────────────────────────────
+const PHASES = [
+{id:1, name:'The Clean Slate', years:'2008–2009',
+ world:`In September 2008, Lehman Brothers collapsed in New York. Within weeks, the copper price fell 60% — from $8,800 per tonne to under $3,500. For a country where copper accounts for nine-tenths of export earnings, this is not a distant financial crisis. It lands directly in the national budget.
+
+The shock is severe but short. By mid-2009, copper is recovering. The IMF has extended emergency facilities across the continent. Varundi exits the crisis with something rare: a clean balance sheet and a world suddenly very interested in African growth stories.
+
+The question is what to do with the recovery.`,
+ roles:{
+  finance_minister:{
+   briefing:`Debt-to-GDP: 22%. Foreign exchange reserves: 3.8 months of imports. The IMF facility got you through the worst of 2008. Copper is rebounding and investors are circling. The World Bank is offering a $400m development loan at 1.5% over 25 years, tied to a public finance reform programme. Chinese contractors have submitted proposals for three road projects — $600m at 2.8%, 15-year maturity, no reform conditions. You can take one, both, or neither.`,
+   decision:`The World Bank loan requires accepting reform conditions. The Chinese package is faster, more politically popular, and comes with no strings — but at shorter maturity and higher cost. An election is two years away.`,
+   opts:[
+    {id:'A',lbl:'World Bank loan only',desc:'Lower cost, longer maturity, reform conditions included. Slower disbursement.',
+     conseq:'The World Bank loan is signed. Infrastructure moves slowly but the reform conditions begin improving revenue collection. Debt service stays manageable. Foreign exchange reserves hold steady.',
+     ind:{debt:3,wages:0,rating:0,reserves:0.2},def:null,score:1},
+    {id:'B',lbl:'Chinese road package only',desc:'Faster, no conditions, politically popular. Roads are visible and the election is two years away.',
+     conseq:'The roads are moving. Chinese contractors arrive within weeks. The Cabinet is pleased. The debt service schedule loads heavily at years 8–10, but that is someone else\'s problem for now.',
+     ind:{debt:6,wages:2,rating:0,reserves:-0.2},def:'chinese_debt',score:0},
+    {id:'C',lbl:'Accept both packages',desc:'Maximum investment. Debt rises to ~38% of GDP — still below warning thresholds.',
+     conseq:'Both are signed. Construction surges. The Finance Ministry is praised internationally. Debt is rising fast, but GDP growth is too — for now.',
+     ind:{debt:10,wages:3,rating:0,reserves:-0.4},def:'both_debt',score:-1},
+    {id:'D',lbl:'Accept neither',desc:'Maintain the clean balance sheet. Invest only from current revenue. Fiscally disciplined; politically unpopular.',
+     conseq:'You decline. Roads are not built. The President is displeased. But the balance sheet stays clean, and when the next shock arrives, you will have room to move.',
+     ind:{debt:0,wages:-1,rating:1,reserves:0.5},def:null,score:2}
+   ]},
+  imf_chief:{
+   briefing:`The emergency facility worked. Varundi\'s balance sheet is clean and the government is cooperative. Debt-to-GDP at 22% is well below our 55% warning threshold. This is the window: if Varundi builds fiscal buffers now, it can absorb the next commodity shock without crisis. If it borrows heavily against the upswing instead, the next downturn will be severe. The World Bank and Chinese bilateral lenders are both circling.`,
+   decision:`Your Article IV consultation is being finalised. Your public assessment will shape the government\'s borrowing appetite. A positive assessment will be cited to justify loans you may privately regard as excessive.`,
+   opts:[
+    {id:'A',lbl:'Issue a strong public warning on commodity-linked borrowing',desc:'Make clear that excessive borrowing now constrains future options. Risk souring a cooperative relationship.',
+     conseq:'The warning is published. The Finance Ministry pushes back in the press. But three years later, when you need the government to engage honestly about debt levels, they will remember that you told the truth when it mattered.',
+     ind:{debt:0,wages:0,rating:0},def:null,score:1},
+    {id:'B',lbl:'Issue a positive assessment, encouraging investment',desc:'Celebrate Varundi\'s recovery. Encourage the growth narrative. Risk: your endorsement is used to justify borrowing you privately doubt.',
+     conseq:'"IMF endorses Varundi\'s growth trajectory," runs the headline. The Finance Minister shows it to every bilateral lender in the next twelve months.',
+     ind:{debt:0,wages:0,rating:0},def:'imf_positive',score:-1},
+    {id:'C',lbl:'Nuanced assessment — cautiously optimistic with risk caveats',desc:'Technically honest. Practically easy to ignore. The risks are in the annex.',
+     conseq:'Nobody reads the annex. The headline quote — "Varundi\'s recovery is on solid footing" — is reproduced in twelve investor prospectuses over the next two years.',
+     ind:{debt:0,wages:0,rating:0},def:'imf_nuanced',score:0}
+   ]},
+  civil_servant:{
+   briefing:`The past year was hard. Drug procurement was suspended for six months. You covered gaps by pooling contributions with colleagues to buy antibiotics from a private pharmacy. Things are improving now. The Ministry has issued its first recruitment notice in three years. Your salary review is due. There is talk of a new regional hospital being built in the north.`,
+   decision:`You have been offered a position with an international health NGO. The salary is nearly double your current rate. The work is similar — health systems — but the contract is project-based with a fixed three-year term.`,
+   opts:[
+    {id:'A',lbl:'Stay in the Ministry',desc:'The salary is lower but you believe in the public system and have seniority.',
+     conseq:'You stay. The salary review comes through — a 7% increase, barely tracking inflation. But you are here. Your experience matters when the new northern hospital opens.',
+     ind:{debt:0,wages:1,rating:0},def:null,score:1},
+    {id:'B',lbl:'Take the NGO position',desc:'Your family\'s stability comes first. You will still be working on health systems — just not as a civil servant.',
+     conseq:'You leave. Your replacement takes months to hire and arrives with no institutional memory. The procurement processes you built over seven years exist only in your head. Three months later, a drug stockout.',
+     ind:{debt:0,wages:3,rating:0},def:'staff_left',score:0}
+   ]},
+  opposition_leader:{
+   briefing:`The ruling party is flush with post-HIPC goodwill. The World Bank and Chinese lenders are both circling. Your researchers have flagged that the Chinese loan terms — 2.8% over 15 years — compare unfavourably with the World Bank\'s 1.5% over 25 years. The government is likely to take one or both. An election is two years away and they want visible infrastructure.`,
+   decision:`Early warnings are often ignored. Speaking now puts you on record — which is either a future asset or an early embarrassment. Silence now preserves options for later, but so does the government\'s debt.`,
+   opts:[
+    {id:'A',lbl:'File a parliamentary question on loan terms and fiscal risk',desc:'Go on record. Demand publication of the full debt sustainability analysis for any loan over $100m.',
+     conseq:'The question is filed. The Finance Ministry gives a dismissive answer. But the parliamentary record now contains your 2009 warning. In 2016, a journalist will find it.',
+     ind:{debt:0,wages:0,rating:0},def:null,score:1},
+    {id:'B',lbl:'Commission your own research — say nothing publicly yet',desc:'Build your evidence base quietly. Save the credibility for when the numbers are clear.',
+     conseq:'Your research team produces a solid analysis. You sit on it. The government proceeds with whatever loans it chooses. You have information. You have not used it.',
+     ind:{debt:0,wages:0,rating:0},def:null,score:0},
+    {id:'C',lbl:'Support the borrowing — development is needed',desc:'Opposition for its own sake helps nobody. The terms are reasonable and the projects are real.',
+     conseq:'Your public support helps the government\'s case for the Chinese loan. The roads are built. You are credited with bipartisan statesmanship — until the debt service crisis arrives.',
+     ind:{debt:3,wages:1,rating:0},def:null,score:-1}
+   ]},
+  chinexim:{
+   briefing:`Varundi has submitted a proposal for three road projects — $600m total, 15-year maturity, 2.8% interest. The country is post-HIPC with a clean balance sheet. Our risk assessment is positive. The projects are real infrastructure. Two questions face the credit committee: collateral requirements, and the contractor preference clause.`,
+   decision:`Chinese bilateral lending is often defended as south-south development finance with no political strings. The absence of conditionality is its selling point. But the commercial terms contain their own logic.`,
+   opts:[
+    {id:'A',lbl:'Standard terms — no collateral, 30% minimum local labour',desc:'Approve on standard terms. The relationship is more valuable than secured claims.',
+     conseq:'The loan is approved and disbursed quickly. Roads begin within months. The Varundi government is publicly grateful. We have no secured claim in a future default — but we have strong political standing.',
+     ind:{debt:6,wages:2,rating:0,reserves:-0.2},def:null,score:1},
+    {id:'B',lbl:'Require a copper export offtake agreement as soft collateral',desc:'Secure the loan against future copper revenues. Standard practice for resource-backed lending.',
+     conseq:'Varundi agrees after two weeks of negotiation. The roads proceed. The offtake arrangement will give us leverage in any future restructuring — and will be cited as "resource-backed debt" in international commentary.',
+     ind:{debt:6,wages:2,rating:0,reserves:-0.1},def:null,score:0},
+    {id:'C',lbl:'Full contractor preference — all construction to Chinese state firms',desc:'Maximise the benefit to Chinese construction companies. Standard terms otherwise.',
+     conseq:'The loan is approved. Local construction industry is largely bypassed. The roads are built on schedule. The capital transfer back to Chinese contractors will be cited later as evidence that the development benefit was asymmetric.',
+     ind:{debt:6,wages:1,rating:0,reserves:-0.3},def:null,score:-1}
+   ]},
+  farmer:{
+   briefing:`Recovery after the 2008 shock has brought real improvements: a new rural road near your district, an agricultural extension officer visiting twice a year, and government maize subsidies that have been restored. A local cooperative is offering access to an agricultural loan at 14% over five years to expand irrigation on four additional hectares. The extension officer says the timing is right.`,
+   decision:`The loan would expand your irrigated area by a third. The repayment depends on maize prices staying stable and water access being reliable. Both have been uncertain before.`,
+   opts:[
+    {id:'A',lbl:'Take the loan and expand irrigation',desc:'The conditions are favourable. The extension officer\'s advice is sound. Growth requires investment.',
+     conseq:'You take the loan. The irrigation is installed over two seasons. Your yields improve significantly. The repayments are manageable while maize prices hold.',
+     ind:{debt:0,wages:1,rating:0},def:null,score:1},
+    {id:'B',lbl:'Expand using savings — no new debt',desc:'Slower growth but no exposure to interest rates or bank risk.',
+     conseq:'You expand one hectare from savings this season. Progress is slow but the land is yours outright. When input costs spike later, you have no loan repayment adding to the pressure.',
+     ind:{debt:0,wages:1,rating:0},def:null,score:1},
+    {id:'C',lbl:'Hold steady — the situation feels fragile',desc:'The interest rate is high. The last decade has taught you not to trust good periods.',
+     conseq:'You hold. The neighbours who borrowed are doing better for now. You are watching carefully. Your caution will look like wisdom or missed opportunity — it depends on what comes next.',
+     ind:{debt:0,wages:0,rating:0},def:null,score:0}
+   ]}
+ }
+},
+{id:2, name:'The Boom', years:'2010–2012',
+ world:`Chinese demand for copper is driving a global commodity super-cycle. By 2011, copper has reached $10,000 per tonne — more than double its pre-crisis level. Varundi's government revenues are growing faster than any budget forecast predicted. GDP is expanding at 7% a year.
+
+International banks are calling the Finance Ministry to discuss Varundi's first Eurobond — borrowing directly from international capital markets, in US dollars, at market rates. The financial press has a phrase for this moment: Africa Rising. Varundi is cited in investor roadshows.
+
+Nobody is talking about what happens when the copper price falls.`,
+ roles:{
+  finance_minister:{
+   briefing:`Revenue is strong. The infrastructure backlog is enormous. The President has asked you to prepare an ambitious investment budget for the election year. The Eurobond window is open: you could raise $750m at around 5.5% yield, 10-year maturity, bullet repayment in 2022. That funds the infrastructure programme and maintains reserves. Your advisors are divided. Some say seize the moment. Others warn that dollar-denominated debt will be expensive when the exchange rate weakens — and it always weakens eventually.`,
+   decision:`The Eurobond matures in 2022. You will not be Finance Minister in 2022. The question is whether the infrastructure justifies the risk — and whether the risk is yours to take.`,
+   opts:[
+    {id:'A',lbl:'Issue the full $750m Eurobond',desc:'Fund the entire infrastructure programme. Bullet repayment in 2022 is a future government\'s problem.',
+     conseq:'The Eurobond is oversubscribed at 5.4%. Varundi is on the front page of the Financial Times. The infrastructure programme launches. Copper is still rising.',
+     ind:{debt:13,wages:4,rating:0,reserves:0.6},def:'eurobond_full',score:-1},
+    {id:'B',lbl:'Issue a smaller $300m Eurobond',desc:'A conservative market entry. Smaller infrastructure programme. Less popular politically but more manageable.',
+     conseq:'The Eurobond is issued. The infrastructure programme is scaled back — three projects instead of seven. The President is disappointed. The debt service schedule is not dangerous.',
+     ind:{debt:7,wages:2,rating:0,reserves:0.3},def:'eurobond_small',score:1},
+    {id:'C',lbl:'Decline the Eurobond entirely',desc:'Fund infrastructure only from current revenue and concessional loans.',
+     conseq:'You decline. The President\'s displeasure is made known in Cabinet. Your position feels less secure. But when the crash comes, you will have options that other Finance Ministers do not.',
+     ind:{debt:2,wages:1,rating:1,reserves:0.1},def:null,score:2}
+   ]},
+  imf_chief:{
+   briefing:`Varundi\'s macro performance is strong. Reserves at 4.2 months. The Eurobond question is live — the Finance Ministry has informally asked our view. Our concerns: bullet maturity means the full amount is repayable at once in ten years; dollar denomination transfers exchange rate risk to the sovereign; and the yields, while low by African standards, are far above concessional rates from multilaterals. But the government sees this as their first step into capital markets.`,
+   decision:`If you oppose the Eurobond and the government proceeds anyway — which it likely will — you will have spent credibility for nothing. If you support it or stay silent, you are complicit in a risk you believe is real.`,
+   opts:[
+    {id:'A',lbl:'Formally advise against the Eurobond in writing',desc:'Recommend concessional lending only. The government will be annoyed. They will probably proceed anyway.',
+     conseq:'You issue the written advisory. The Finance Minister thanks you for your "perspective" and proceeds. But the advisory is on record. In 2023, someone will find it.',
+     ind:{debt:0,wages:0,rating:0},def:null,score:1},
+    {id:'B',lbl:'Technical note flagging risks — leave the decision to government',desc:'Professional. Non-interventionist. Technically honest. Practically easy to ignore.',
+     conseq:'The technical note is filed. The Finance Minister reads the executive summary. The Eurobond proceeds. You have not lied — but you have not been heard.',
+     ind:{debt:0,wages:0,rating:0},def:null,score:0},
+    {id:'C',lbl:'Privately support the Eurobond as a sign of market maturity',desc:'The positive signal helps Varundi\'s investor story. You can address debt levels in the next Article IV.',
+     conseq:'Your informal support leaks into the investor roadshow materials. The Eurobond is oversubscribed. The Finance Minister is effusive. The Article IV that addresses debt levels is three years away.',
+     ind:{debt:0,wages:0,rating:0},def:'imf_supported_bond',score:-1}
+   ]},
+  civil_servant:{
+   briefing:`The Ministry budget is the best in a decade. Procurement is running smoothly. Drug stockouts are a memory. Three new colleagues have joined your department. Your salary has been reviewed upward. The northern hospital is under construction. The trade union is holding its annual meeting — debating whether to push for a larger wage increase now, while the government is flush.`,
+   decision:`The union argument: if not now, when? The government can afford 15% rather than the offered 8%. But a large increase becomes a fixed cost the government cannot easily reverse when revenues fall.`,
+   opts:[
+    {id:'A',lbl:'Support the union push for 15%',desc:'The government can afford it now. Real wages deserve to recover from the crisis years.',
+     conseq:'The 15% is won after a brief strike threat. Relief and satisfaction. But across the civil service, it embeds a wage floor. In four years, that floor will be politically impossible to lower — even when the budget requires it.',
+     ind:{debt:0,wages:6,rating:0},def:'high_wages',score:0},
+    {id:'B',lbl:'Accept the 8% offer',desc:'Take the goodwill. Focus on job security rather than wage levels.',
+     conseq:'The 8% is accepted. Relations with management stay warm. The wage floor is modest and will be easier to maintain through lean years.',
+     ind:{debt:0,wages:2,rating:0},def:null,score:1}
+   ]},
+  opposition_leader:{
+   briefing:`The copper boom is real and the government\'s popularity is at a high-water mark. The Eurobond will likely be oversubscribed. Opposing it now looks politically foolish. But you have obtained a copy of the IMF\'s technical note — it flags bullet maturity and dollar denomination as structural risks. The Finance Minister has been careful not to mention these in public.`,
+   decision:`The political calculation: oppose the Eurobond when it looks like it will succeed, or build credibility for when it fails. Either choice involves a cost.`,
+   opts:[
+    {id:'A',lbl:'Formally oppose the Eurobond — go on the record',desc:'Cite the IMF technical note in a parliamentary speech. You will look like a pessimist in a boom year.',
+     conseq:'Your speech is reported on page 12 of the business section. You are described as "cautious." The Eurobond is oversubscribed. In 2020, page 12 becomes Exhibit A.',
+     ind:{debt:0,wages:0,rating:0},def:null,score:1},
+    {id:'B',lbl:'Raise concerns in parliamentary committee only',desc:'Put the risks on record without making it a public confrontation.',
+     conseq:'The committee minutes record your questions. The Finance Ministry responds with reassurances. The Eurobond proceeds. Your concerns are noted and filed.',
+     ind:{debt:0,wages:0,rating:0},def:null,score:0},
+    {id:'C',lbl:'Say nothing this cycle — preserve credibility for when it matters',desc:'A boom year opposition is ignored opposition. Wait for the evidence.',
+     conseq:'You say nothing. The Eurobond succeeds. You have spent no credibility. You have also done nothing to slow the trajectory. The evidence will come.',
+     ind:{debt:0,wages:0,rating:0},def:null,score:-1}
+   ]},
+  chinexim:{
+   briefing:`Varundi is approaching us informally — the Finance Ministry wants to know whether we can provide budget support beyond the infrastructure portfolio. Chinese commercial banks are also circling. This is outside our core infrastructure mandate, but our government is not discouraging the relationship-deepening. The budget support would be structured through a state enterprise to keep it off the formal debt register.`,
+   decision:`Our mandate is infrastructure. Budget support for a sovereign with a growing debt trajectory sits in a different risk category. But the relationship is valuable and the government is cooperative.`,
+   opts:[
+    {id:'A',lbl:'Stay within mandate — infrastructure only',desc:'Decline the budget support. Refer the government to commercial channels.',
+     conseq:'We decline politely. The government proceeds through commercial banks. Our balance sheet is clean. The relationship is maintained. We are not in the restructuring queue for this instrument.',
+     ind:{debt:0,wages:0,rating:0},def:null,score:1},
+    {id:'B',lbl:'Provide a modest budget support facility through a state enterprise',desc:'Keep it off the headline debt figures. The relationship is worth the risk.',
+     conseq:'The facility is structured through a state trading company. It provides short-term budget relief. It is not in the published debt statistics. It will be in the restructuring pile.',
+     ind:{debt:5,wages:2,rating:0,reserves:0.2},def:'chinexim_boom_loans',score:-1},
+    {id:'C',lbl:'Facilitate introductions to Chinese commercial lenders',desc:'Stay out of it directly. Let the relationship develop commercially.',
+     conseq:'We make the introductions. Commercial loans follow. Our balance sheet is clean. The overall Chinese creditor exposure in Varundi grows — which affects the eventual restructuring dynamics regardless.',
+     ind:{debt:3,wages:1,rating:0},def:null,score:0}
+   ]},
+  farmer:{
+   briefing:`Good years. Maize prices are up. The government has introduced a fertiliser subsidy that halves your input costs. Your yield is the best in five years. The cooperative is expanding. The Chinese road near your farm has cut transport costs significantly. A government agricultural development bank is offering loans at 11% — lower than the cooperative's rate — to expand into a second cash crop.`,
+   decision:`The fertiliser subsidy is making expansion genuinely attractive for the first time. A second crop would diversify your income. The question is whether to borrow to do it or use savings.`,
+   opts:[
+    {id:'A',lbl:'Take the development bank loan — plant tobacco as a second crop',desc:'Higher-value crop, lower loan rate. Diversification against maize price risk.',
+     conseq:'You take the loan. Tobacco planting begins the following season. The income diversification works well while prices are stable. You have borrowed against the good times.',
+     ind:{debt:0,wages:2,rating:0},def:null,score:0},
+    {id:'B',lbl:'Expand maize acreage using the subsidy savings',desc:'No new debt. Use the subsidy windfall to invest in your existing operation.',
+     conseq:'You expand using this season\'s profits. No new debt. When the subsidy is eventually removed, you have a larger productive base but no additional loan obligations.',
+     ind:{debt:0,wages:2,rating:0},def:null,score:1},
+    {id:'C',lbl:'Diversify into higher-value crops that do not rely on subsidies',desc:'Less dependent on government support. More market risk, more reward.',
+     conseq:'You begin experimenting with horticulture for the regional market. The returns are volatile but promising. You are less dependent on a subsidy that may not last.',
+     ind:{debt:0,wages:1,rating:0},def:null,score:1}
+   ]}
+ }
+},
+{id:3, name:'The Temptation', years:'2012–2013',
+ world:`Copper remains strong, but analysts who pay attention notice Chinese growth is moderating. Varundi's presidential election is six months away. Both major parties have published infrastructure manifestos. The ruling party promises a new university, expanded free healthcare, rural electrification. The opposition promises all of the above plus lower taxes.
+
+Nobody is talking about debt sustainability.
+
+Global interest rates remain at historic lows. African Eurobonds at 5–7% yield are drawing institutional investors who cannot find returns at home. A second wave of African governments is entering the market.`,
+ roles:{
+  finance_minister:{
+   briefing:`The election is six months away. The President needs the university and electrification announcements before campaign season. You have already issued one Eurobond. There is appetite for a second — possibly $500m. Chinese construction companies have also returned with a stadium and convention centre backed by a bilateral loan at 3.2%. Your private calculation: this debt is manageable if copper stays above $7,000 per tonne. It is currently at $8,200. If it falls below $5,000 — which has happened before — it becomes a serious problem.`,
+   decision:`You are borrowing against an optimism that may or may not be warranted. The election requires visible infrastructure. The debt will mature long after the election.`,
+   opts:[
+    {id:'A',lbl:'Issue second Eurobond and accept Chinese stadium loan',desc:'Full election programme delivered. Debt-to-GDP rises to ~48% — still below IMF warning thresholds.',
+     conseq:'Both are signed. The university foundation stone is laid three weeks before the election. The President wins comfortably. Debt is rising fast. Nobody mentions it in the victory speech.',
+     ind:{debt:15,wages:3,rating:-1,reserves:-0.5},def:'double_down',score:-2},
+    {id:'B',lbl:'Issue second Eurobond only, decline Chinese loans',desc:'Partial programme. Some friction with Beijing.',
+     conseq:'The Eurobond proceeds. The stadium is declined. The university is funded. The election is won. The debt service schedule is heavy but not yet critical.',
+     ind:{debt:9,wages:2,rating:0,reserves:-0.2},def:null,score:0},
+    {id:'C',lbl:'Decline all new borrowing',desc:'Fund only what current revenue allows. Significant political cost.',
+     conseq:'You decline. The university is deferred. The opposition calls you timid. But debt-to-GDP stays under 35%, and when copper falls, you will have room to manoeuvre that your counterparts across the continent will envy.',
+     ind:{debt:0,wages:0,rating:1,reserves:0.3},def:null,score:2}
+   ]},
+  imf_chief:{
+   briefing:`Debt-to-GDP is approaching 42%. The trajectory is concerning: three years of above-forecast borrowing driven by election cycles has created a debt service schedule that is only manageable if copper stays strong. Your models show that a 30% copper price decline — not historically unusual — would push debt service above 25% of revenue within four years. The election is in six months. The Article IV is due.`,
+   decision:`Publishing a full debt sustainability analysis during election season will be seen as political interference. Sitting on it would be a dereliction of your mandate. There is a middle path — but it is easily ignored.`,
+   opts:[
+    {id:'A',lbl:'Publish the full analysis including downside scenarios',desc:'It will read as a warning. The government will call it election interference.',
+     conseq:'The analysis is published. "Politically motivated," says the Finance Ministry. Three years later, when restructuring is underway, this document will be Exhibit A.',
+     ind:{debt:0,wages:0,rating:0},def:null,score:1},
+    {id:'B',lbl:'Standard Article IV with risks in the technical annex',desc:'Technically complete. The risks are there — just not on the front page.',
+     conseq:'"Varundi maintains strong growth fundamentals," runs the headline. The downside scenarios are in Table 7 of Annex III. Nobody reads Annex III.',
+     ind:{debt:0,wages:0,rating:0},def:null,score:0},
+    {id:'C',lbl:'Delay Article IV publication until after the election',desc:'Unusual but not unprecedented. Avoids a political flashpoint.',
+     conseq:'The Article IV is delayed. When published, the concerns look like hindsight rather than warning. The government notes, correctly, that you did not flag this before they acted.',
+     ind:{debt:0,wages:0,rating:0},def:'imf_delayed',score:-1}
+   ]},
+  civil_servant:{
+   briefing:`The election campaign is everywhere. A colleague in the Budget Directorate tells you quietly that the Ministry of Finance has "committed" next year\'s health budget several times over — meaning allocations exist on paper but cash transfers may not arrive on time. The vendor who supplies surgical equipment has told you the government is already 90 days behind on payments.`,
+   decision:`The vendor is asking for your help. They will continue supplying — but they need assurance. You can raise this formally, which may embarrass the Ministry before an election. Or you can handle it informally, buying time.`,
+   opts:[
+    {id:'A',lbl:'Raise the payment delay formally in writing',desc:'Write a memo flagging the vendor\'s concern and the supply disruption risk.',
+     conseq:'The memo is filed. Your director is unhappy — nobody likes bad news before an election. But the payment is partially cleared within six weeks, and the paper trail is there.',
+     ind:{debt:0,wages:0,rating:0},def:null,score:1},
+    {id:'B',lbl:'Handle it informally through personal assurances',desc:'Maintain the vendor relationship through goodwill. Hope the cash arrives after the election.',
+     conseq:'The vendor stays on your personal assurance. The backlog quietly grows. After the election, the cash still doesn\'t arrive. By Phase 5 it is a procurement crisis nobody can explain because nobody wrote it down.',
+     ind:{debt:0,wages:0,rating:0},def:'procurement_crisis',score:-1}
+   ]},
+  opposition_leader:{
+   briefing:`An election is in six months. Your party is within striking distance. The ruling party is promising a university, a stadium, expanded healthcare — all to be financed by new borrowing. Your manifesto team says you need to match them or exceed them. Your research team says the debt is already concerning. Both teams are right.`,
+   decision:`What your manifesto says about borrowing will define your economic credibility for the next decade — and may determine whether you win the election.`,
+   opts:[
+    {id:'A',lbl:'Publish a genuinely conservative manifesto with debt ceilings',desc:'Commit to no new commercial borrowing and a debt-to-GDP ceiling of 45%.',
+     conseq:'Your manifesto is praised by the financial press and criticised by every opposition voter who wanted the stadium. You lose the election narrowly. In 2020, when the default happens, your 2013 manifesto is quoted in every newspaper.',
+     ind:{debt:0,wages:0,rating:1},def:null,score:2},
+    {id:'B',lbl:'Match the ruling party\'s promises with a fiscal responsibility clause',desc:'We\'ll borrow — but transparently, with parliamentary oversight.',
+     conseq:'You lose the election, but narrowly. The fiscal clause creates a rhetorical opening: when the government borrows without parliamentary oversight in 2016, you are on record demanding accountability.',
+     ind:{debt:3,wages:1,rating:0},def:null,score:0},
+    {id:'C',lbl:'Outbid the ruling party — more infrastructure, funded after winning power',desc:'Win first, govern second. The debt problem will be manageable once you have control of the budget.',
+     conseq:'You lose. The promises you made are now on record. In 2018, when you sit in opposition during IMF programme debates, your 2013 manifesto will be quoted back at you.',
+     ind:{debt:6,wages:2,rating:-1},def:'opp_election_call',score:-2}
+   ]},
+  chinexim:{
+   briefing:`Varundi\'s government has submitted a proposal for a stadium and convention centre — $380m at 3.2%, 12-year maturity. Our state enterprise consortium is the proposed contractor. Our risk committee has noted: at current terms, if copper revenues fall 30%, Varundi\'s debt service would exceed 25% of revenue. Our government wants the contract. The election is in six months.`,
+   decision:`The project is commercially viable if copper stays above $6,500 per tonne. It is currently $8,200. The election timeline creates pressure to move quickly.`,
+   opts:[
+    {id:'A',lbl:'Approve on standard terms',desc:'The current DSA is acceptable. Approve and proceed.',
+     conseq:'The loan is approved and the groundbreaking is before the election. Our state enterprise secures the contract. Varundi\'s debt trajectory has moved into warning territory. We have approved it.',
+     ind:{debt:8,wages:2,rating:-1,reserves:-0.3},def:null,score:-1},
+    {id:'B',lbl:'Approve with modified terms — extend to 18 years, require revenue escrow',desc:'Longer maturity improves the DSA. The escrow protects our position.',
+     conseq:'Varundi accepts the modified terms after brief negotiation. The maturity extension reduces annual debt service pressure. The escrow arrangement gives us a degree of protection other creditors lack.',
+     ind:{debt:7,wages:1,rating:0,reserves:-0.2},def:null,score:1},
+    {id:'C',lbl:'Decline — the DSA does not support it',desc:'We would be lending into an unsustainable trajectory.',
+     conseq:'We decline. The government is displeased and takes the stadium proposal to a commercial bank instead. We have preserved our balance sheet. The loan happens anyway — just with a different creditor.',
+     ind:{debt:0,wages:0,rating:0},def:null,score:1}
+   ]},
+  farmer:{
+   briefing:`Both parties are making promises to rural voters: expanded fertiliser subsidies, a new irrigation scheme for your district, guaranteed minimum prices. Your cooperative chair is cautiously optimistic but has seen these promises before. The registration process for the new irrigation scheme requires paperwork — and the local officer is hinting that facilitation is expected.`,
+   decision:`The irrigation scheme could transform your productive capacity. Registration involves navigating a process that is not quite legal and not quite fair. You decide how to engage.`,
+   opts:[
+    {id:'A',lbl:'Pay the facilitation payment and register',desc:'The scheme is genuinely valuable. The payment is the cost of doing business in this system.',
+     conseq:'You register. The scheme moves slowly — it was partly election theatre — but three years later, the irrigation infrastructure is partially installed. You are on the list.',
+     ind:{debt:0,wages:1,rating:0},def:null,score:0},
+    {id:'B',lbl:'Register through official channels — refuse to pay',desc:'It will take longer. You may miss the first allocation. But it is the right channel.',
+     conseq:'Your application is in the queue. Others who paid move faster. The scheme materialises partially. You are eventually registered, later than your neighbours. The delay costs one season.',
+     ind:{debt:0,wages:0,rating:0},def:null,score:1},
+    {id:'C',lbl:'Don\'t register — too much corruption risk',desc:'The scheme may not materialise. The payment has no guarantee.',
+     conseq:'You don\'t register. The scheme partially materialises for those who did. You miss the first allocation but your money is safe. When the scheme is cut in Phase 5, those who paid will have lost their facilitation fee too.',
+     ind:{debt:0,wages:-1,rating:0},def:null,score:0}
+   ]}
+ }
+},
+{id:4, name:'The Crash', years:'2014–2016',
+ world:`Chinese growth is slowing. The copper price begins to fall in late 2014 and does not stop. By early 2016 it is at $4,400 per tonne — down nearly 50% from its peak. Varundi's currency loses 40% of its value against the US dollar in eighteen months.
+
+Every debt denominated in dollars now costs 40% more to service in local currency than when it was borrowed. This was always the risk. It was always in the models. Nobody planned for it.
+
+The IMF's private projections — not yet published — show debt service consuming 28% of government revenue by 2018. The Finance Ministry's public projections show 19%. Both use the same underlying data.`,
+ roles:{
+  finance_minister:{
+   briefing:`The crash was not supposed to happen this fast. In local currency terms, your debt service costs have exploded — this is original sin made concrete. You have four options: cut spending, raise taxes, borrow more to cover the gap, or approach the IMF — which requires conditions the President has publicly called "a national humiliation." A fifth option has emerged: Beijing is signalling openness to a bilateral RMB swap line, following Kenya's precedent with the PBoC in 2023. It provides hard currency relief without IMF conditions — but in renminbi, not dollars, and RMB is not fully convertible.`,
+   decision:`Every option forecloses something else. The question is not which option is good. It is which damage you are willing to own.`,
+   opts:[
+    {id:'A',lbl:'Approach the IMF quietly and begin programme negotiations',desc:'Accept that conditions will be uncomfortable. Better to address this now than when it is worse.',
+     conseq:'You call the Mission Chief. The conversation is painful. But the process begins. In three years, you will look back on this as the decision that prevented a default.',
+     ind:{debt:0,wages:-3,rating:1,reserves:0.3},def:null,score:2},
+    {id:'B',lbl:'Issue a third Eurobond to cover the gap',desc:'The yield will be around 9%. You are borrowing at a high price to delay dealing with the underlying problem.',
+     conseq:'The third Eurobond is issued at 9.25%. Debt service now consumes 24% of revenue. You have bought two years. The price of those two years will arrive in 2020.',
+     ind:{debt:11,wages:-2,rating:-2,reserves:0.3},def:'third_eurobond',score:-2},
+    {id:'C',lbl:'Impose unilateral austerity: wage freeze, subsidy cuts, delayed projects',desc:'No IMF, no new debt. Keeps sovereignty intact. Politically brutal.',
+     conseq:'The wage freeze is announced. The union calls a strike within a week. Subsidy removal triggers protests. But the fiscal gap narrows. The path ahead is painful — it is still a path.',
+     ind:{debt:0,wages:-5,rating:0,reserves:-0.2},def:null,score:1},
+    {id:'D',lbl:'Seek a PBoC currency swap line — the RMB route',desc:'Approach China\'s central bank for a bilateral RMB swap. Hard currency relief without IMF conditionality — but renminbi is not freely convertible.',
+     conseq:'Beijing agrees to a swap line providing $800m equivalent in RMB. It eases the immediate hard currency squeeze and buys eight months of breathing room. The original sin of dollar debt remains. The structural problem is not solved — it is delayed on softer terms.',
+     ind:{debt:3,wages:-1,rating:0,reserves:1.5},def:null,score:0}
+   ]},
+  imf_chief:{
+   briefing:`The scenario we warned about has arrived. Copper is down 50%. The currency is down 40%. Debt service is spiking in local currency terms. The Finance Ministry is 60 days late returning our calls. Our projections show debt-to-GDP crossing 60% within two years without intervention. The government has floated a third Eurobond at 9% yield. We regard this as throwing fuel on a fire.`,
+   decision:`You can intervene or wait. Intervening without invitation is politically sensitive. Waiting means the situation deteriorates to where intervention comes too late to prevent a default.`,
+   opts:[
+    {id:'A',lbl:'Request an urgent meeting and deliver a clear oral warning',desc:'Prepare a formal proposal for a precautionary programme.',
+     conseq:'The meeting is tense. The Finance Minister is defensive. But within three months, they call back. The precautionary programme begins. The third Eurobond is not issued.',
+     ind:{debt:0,wages:0,rating:1,reserves:0.2},def:null,score:1},
+    {id:'B',lbl:'Publish an updated debt sustainability assessment',desc:'The markets will read it. Bond spreads will widen. The government will be furious — and may have to call you.',
+     conseq:'Spreads on Varundi\'s Eurobonds jump 180 basis points overnight. The Finance Minister calls it "interference." They also call you the next morning to discuss a programme.',
+     ind:{debt:0,wages:0,rating:-1,reserves:0},def:null,score:0},
+    {id:'C',lbl:'Wait for the government to come to you',desc:'Intervening without invitation risks the relationship.',
+     conseq:'You wait. The government issues the third Eurobond at 9.25%. Varundi pays twice what it needed to for money it did not need to borrow if it had come to you six months earlier.',
+     ind:{debt:0,wages:0,rating:-1,reserves:-0.2},def:null,score:-1}
+   ]},
+  civil_servant:{
+   briefing:`Mealie meal is up 35% in eight months. Currency collapse has driven up the cost of anything imported — which includes most drugs in the public hospital system. Your nominal salary is unchanged. In real terms it has fallen by nearly a quarter. Three colleagues have taken jobs abroad this year. The northern hospital, opened eighteen months ago, is running at 40% capacity because it cannot reliably get supplies.`,
+   decision:`The real wage has fallen sharply. The crisis is structural, not temporary. You need to decide how you respond.`,
+   opts:[
+    {id:'A',lbl:'Organise through the trade union for a cost-of-living increase',desc:'Formal collective action. Legitimate but difficult in a squeezed budget.',
+     conseq:'The union files the demand. The government offers 3%. The union strikes. A week of ward closures and the government offers 6% — still below inflation. Your real wage keeps falling, more slowly.',
+     ind:{debt:0,wages:-1,rating:0},def:null,score:1},
+    {id:'B',lbl:'Seek transfer to a donor-funded project within the Ministry',desc:'Better pay — but removes you from the core public system.',
+     conseq:'The transfer comes through. Your salary is 60% higher. The programme you join focuses on malaria surveillance. The procurement crisis you left behind deepens without your institutional knowledge.',
+     ind:{debt:0,wages:4,rating:0},def:null,score:0},
+    {id:'C',lbl:'Begin exploring emigration options quietly',desc:'Your nursing qualification is recognised in the UK. Not a decision yet — just information-gathering.',
+     conseq:'You make enquiries. The UK registration process takes eight months. You start it. For now you are still here, still processing orders, watching the stockouts spread.',
+     ind:{debt:0,wages:0,rating:0},def:'emigration_pending',score:0}
+   ]},
+  opposition_leader:{
+   briefing:`The copper crash you were quietly predicting has arrived. Your 2009 parliamentary question and your 2011 committee submissions are now being quoted in newspapers. The Finance Ministry is refusing to publish its full debt projections. A parliamentary motion to compel disclosure is technically possible. The ruling party\'s majority is thin after the last election.`,
+   decision:`The crash gives you leverage. How you use it will determine whether you are remembered as a statesman or a politician.`,
+   opts:[
+    {id:'A',lbl:'File a motion to compel publication of the full debt sustainability analysis',desc:'Force transparency. The public has a right to know the actual numbers.',
+     conseq:'The motion is filed. The government fights it. A court eventually orders publication. The numbers, when they appear, are worse than the public statements. Your motion produced the document that underpins everything that follows.',
+     ind:{debt:0,wages:0,rating:0},def:'opp_on_record',score:1},
+    {id:'B',lbl:'Call a press conference demanding the Finance Minister\'s resignation',desc:'Political accountability. Put the failure at a named individual\'s door.',
+     conseq:'The press conference runs on every channel. The Finance Minister does not resign. But the framing — personal responsibility for the debt crisis — sticks in public memory.',
+     ind:{debt:0,wages:0,rating:-1},def:'opp_warned',score:0},
+    {id:'C',lbl:'Open back-channel talks — offer to support an IMF programme',desc:'Bipartisan cover for an unpopular but necessary policy move.',
+     conseq:'The back-channel produces results. The Finance Minister eventually approaches the IMF with implicit opposition support, which reduces the political cost. You receive no public credit. The programme begins.',
+     ind:{debt:0,wages:1,rating:1},def:null,score:1}
+   ]},
+  chinexim:{
+   briefing:`Copper is down 50%. The kwacha has lost 40% against the dollar. Varundi\'s debt service costs in local currency have exploded. The Finance Ministry is formally requesting a two-year grace period on the road loan principal repayments. Our exposure is $980m — we are the largest single bilateral creditor. Granting the grace period reduces our near-term receipts. Refusing may force an early default that costs us far more.`,
+   decision:`We signed a contract. The government signed a contract. In normal times, contracts hold. These are not normal times — and what we do here will shape the restructuring if it comes.`,
+   opts:[
+    {id:'A',lbl:'Grant a two-year grace period on principal repayments',desc:'Preserve the relationship and buy time. Reduces immediate default risk.',
+     conseq:'The grace period is agreed. The Finance Ministry is publicly grateful. The goodwill this generates will matter in the restructuring negotiations. We have bought ourselves a seat at the table.',
+     ind:{debt:0,wages:0,rating:1,reserves:0.3},def:null,score:1},
+    {id:'B',lbl:'Grant grace period conditional on Varundi approaching the IMF',desc:'Link our flexibility to a broader framework. Reduce moral hazard.',
+     conseq:'The condition is accepted after three weeks of resistance. The grace period buys time. The IMF engagement begins. We have helped produce the structural solution rather than just the bridge.',
+     ind:{debt:-2,wages:0,rating:2,reserves:0.5},def:null,score:2},
+    {id:'C',lbl:'Hold firm — Varundi signed a contract',desc:'Precedent-setting: flexibility now invites requests from every other borrower.',
+     conseq:'We hold. Varundi misses a principal payment. The default clock accelerates. Our rigidity will be cited in every post-mortem of this crisis. We are owed the money. We will not see it for years.',
+     ind:{debt:3,wages:-1,rating:-2,reserves:-0.5},def:'chinexim_acceleration',score:-2}
+   ]},
+  farmer:{
+   briefing:`The copper crash has hit the national budget — but for you the impact is more immediate. The kwacha has lost 40% against the dollar. Your fertiliser — imported — now costs 65% more. Fuel is up 55%. Your government development bank loan is in local currency, so repayments are unchanged. But input costs are destroying your margins. The government has quietly cut the fertiliser subsidy by 35% as part of its budget squeeze.`,
+   decision:`Your production costs have spiked. Your income is in local currency. The real cost of running your farm has exploded in a single season.`,
+   opts:[
+    {id:'A',lbl:'Reduce acreage — plant only what you can cover without the subsidy',desc:'Accept smaller output. Avoid new debt. Preserve the land.',
+     conseq:'You reduce. Output falls by a third. But you have no new debt, no exposure to further input cost rises, and your land is intact. You survive this season by becoming smaller.',
+     ind:{debt:0,wages:-3,rating:0},def:null,score:1},
+    {id:'B',lbl:'Take a short-term loan to cover input costs this season',desc:'Bet on a recovery. One bad season shouldn\'t end a viable farm.',
+     conseq:'The loan covers this season\'s inputs. The harvest is reasonable. But prices do not recover as you hoped, and the loan rolls over. The interest compounds.',
+     ind:{debt:1,wages:-1,rating:0},def:'farmer_debt',score:0},
+    {id:'C',lbl:'Switch to traditional low-input varieties — no imported fertiliser',desc:'Lower yields but negligible input cost exposure.',
+     conseq:'You switch. Yields fall by about 20% but your cost base halves. You have effectively insured yourself against the hard currency shock by removing the import dependency from your farming model.',
+     ind:{debt:0,wages:-2,rating:0},def:null,score:1}
+   ]}
+ }
+},
+{id:5, name:'The Squeeze', years:'2017–2019',
+ world:`A presidential election is held. The incumbent survives on a platform of defending national sovereignty against foreign interference — a phrase deployed against both the IMF and opposition critics. The victory is narrow and contested.
+
+Copper has partially recovered but remains well below peak. A coupon payment of $120m is due in 2019. International reserves stand at 1.8 months of imports. The credit rating has been downgraded twice.
+
+The IMF has been waiting, as it has waited for two years, for a phone call.`,
+ roles:{
+  finance_minister:{
+   briefing:`The fiscal position is worse than your public statements acknowledge. The 2019 coupon is approaching. Without an IMF programme, market access is effectively closed. You have sounded out the Mission Chief informally: conditions will include removal of fuel and maize subsidies, a civil service wage freeze, publication of all contingent liabilities, and a primary surplus target within 18 months. These conditions are politically toxic. Without the programme, you will not make the 2019 payment.`,
+   decision:`You came into office promising never to go to the IMF. You are about to go to the IMF. The question is whether you go fully or try to negotiate softer conditions.`,
+   opts:[
+    {id:'A',lbl:'Accept the IMF programme with all conditions',desc:'Announce it as a "reform partnership." Manage the political fallout directly.',
+     conseq:'The programme is signed. The subsidy removal is announced. Fuel prices jump 40%. Protests follow within 24 hours. The President is furious but contained. The 2019 coupon is paid. Barely.',
+     ind:{debt:-6,wages:-6,rating:2,reserves:0.5},def:null,score:2},
+    {id:'B',lbl:'Accept programme but negotiate one-year delay on subsidy removal',desc:'The IMF may agree. Fiscal math is tighter. Political cost is deferred, not eliminated.',
+     conseq:'The Mission Chief agrees to the delay. The programme is announced as "phased adjustment." The 2019 coupon is paid. One year later, the delayed subsidy removal lands during a drought.',
+     ind:{debt:-3,wages:-3,rating:1,reserves:0.2},def:null,score:1},
+    {id:'C',lbl:'Reject IMF terms; pursue bilateral rescheduling with China',desc:'China is the largest single creditor. A bilateral deal might buy time without IMF conditions.',
+     conseq:'Beijing is cautious. Preliminary conversations begin. The 2019 coupon on the Eurobond — owed to private holders, not China — is missed. The default clock starts.',
+     ind:{debt:3,wages:0,rating:-3,reserves:-0.7},def:'imf_rejected',score:-2}
+   ]},
+  imf_chief:{
+   briefing:`The Finance Ministry has finally called. Debt dynamics are clearly unsustainable without intervention. You have put a programme on the table: subsidy removal, wage freeze, fiscal surplus target, full contingent liability disclosure. The Finance Minister is asking to delay the subsidy removal. Your view: the delay undermines the fiscal arithmetic. But a programme the government breaks is worse than a programme it accepts imperfectly.`,
+   decision:`You can hold the line or flex. This determines how much pain is front-loaded, how much deferred — and who bears it.`,
+   opts:[
+    {id:'A',lbl:'Hold the full programme as designed — no delay on subsidy removal',desc:'Anything less creates moral hazard and undermines the fiscal math.',
+     conseq:'The full programme is signed. Subsidy removal triggers protests lasting three weeks. Two ministers resign. The fiscal adjustment is real. The streets are not satisfied.',
+     ind:{debt:0,wages:0,rating:0},def:null,score:1},
+    {id:'B',lbl:'Agree to one-year delay on subsidy removal',desc:'Tighter math but more politically durable. More likely to survive.',
+     conseq:'The delay is written in. A year later, the subsidy removal happens anyway — during a worse period. Whether you made things better or just moved them is a genuine question.',
+     ind:{debt:0,wages:0,rating:0},def:null,score:0},
+    {id:'C',lbl:'Offer a substantially softer programme — smaller adjustment, longer timeline',desc:'Risk that the Washington Board rejects it.',
+     conseq:'The Board rejects the softer programme. You return with an amended proposal closer to the original. Three months are lost. The 2019 coupon is very close.',
+     ind:{debt:0,wages:0,rating:-1},def:null,score:-1}
+   ]},
+  civil_servant:{
+   briefing:`The fuel subsidy removal has been announced. Public transport costs rise 55% overnight. The maize subsidy phase-out is beginning. Your salary has not risen in two years. In real terms it is now about 68% of what it was in 2012. Two of your three remaining senior colleagues have left the country. The northern hospital has run a drug stockout for the third time this year.`,
+   decision:`The trade union has called a strike for tomorrow. The personal cost is real: a day's pay docked, possible disciplinary action, no certainty it changes anything.`,
+   opts:[
+    {id:'A',lbl:'Join the strike',desc:'Solidarity matters. Collective action is the only leverage available.',
+     conseq:'You join. The strike holds for two days. The government does not reverse the subsidy removal. But a dormant social protection fund is reactivated. It does not close the gap. It acknowledges there is one.',
+     ind:{debt:0,wages:1,rating:0},def:null,score:1},
+    {id:'B',lbl:'Do not join the strike — keep the procurement system running',desc:'Someone has to keep the wards supplied.',
+     conseq:'You stay. The strike goes ahead without you. Your director notes your reliability. The subsidies are not restored. A promotion cycle is coming.',
+     ind:{debt:0,wages:0,rating:0},def:null,score:0},
+    {id:'C',lbl:'Join and submit a formal documented impact report',desc:'Evidence alongside protest: the health system cost of the wage freeze, in writing.',
+     conseq:'You join and deliver the report to the Minister of Health. Two years later it is cited in an NGO report on health system collapse — and in the IMF\'s post-programme review.',
+     ind:{debt:0,wages:0,rating:0},def:null,score:1}
+   ]},
+  opposition_leader:{
+   briefing:`The IMF programme has been announced. Subsidy removal. Wage freeze. A primary surplus target. The streets are in protest. The government is asking Parliament to pass enabling legislation for the subsidy reforms. Your party has enough votes to block the legislation — or let it pass. The political calculation is brutal: blocking helps you in the short term, but if the programme collapses and default follows, you own part of that outcome.`,
+   decision:`You have the votes to block. Using them will be popular. Not using them may be wiser.`,
+   opts:[
+    {id:'A',lbl:'Support the enabling legislation',desc:'The programme is the least-bad option. Take responsibility for saying so.',
+     conseq:'You cross the aisle. The party is furious. Three MPs defect. But the programme passes. Five years later you are credited — by some — with preventing a full default.',
+     ind:{debt:-2,wages:-3,rating:1},def:null,score:1},
+    {id:'B',lbl:'Abstain — let it pass but keep your hands clean',desc:'The legislation passes. You bear no responsibility for the pain. And no credit for the solution.',
+     conseq:'Your abstention allows the programme through. The government notes it. The party is satisfied you didn\'t help. The outcome is the same as if you\'d voted yes — except for what it says about you.',
+     ind:{debt:0,wages:0,rating:0},def:null,score:0},
+    {id:'C',lbl:'Vote against — force the government into a corner',desc:'The government made this crisis. Let them face it alone.',
+     conseq:'The legislation fails by three votes. The programme is suspended. Varundi misses the 2019 coupon. You will spend years arguing about how much of the default was your fault. The argument has no clean answer.',
+     ind:{debt:5,wages:0,rating:-2},def:null,score:-2}
+   ]},
+  chinexim:{
+   briefing:`The IMF programme is underway. The G20 Common Framework is technically applicable. The Paris Club is pressing for "comparable treatment" — meaning we should provide similar debt relief terms to what Western bilateral creditors are offering. Our government is reluctant to accept this framing. We have historically operated through bilateral renegotiation, not multilateral frameworks. But the IMF programme requires broad creditor cooperation.`,
+   decision:`The question is whether we engage with a framework designed without us, on terms that constrain our bilateral leverage. This sets a precedent for every future restructuring involving Chinese lending.`,
+   opts:[
+    {id:'A',lbl:'Engage constructively with the G20 Common Framework',desc:'Accept the comparable treatment principle. Build credibility as a responsible creditor.',
+     conseq:'Our participation legitimises the framework. Paris Club creditors acknowledge it. The restructuring moves forward on a multilateral basis. The precedent is set — and it is, on balance, a better one than the alternative.',
+     ind:{debt:-3,wages:0,rating:1,reserves:0.3},def:null,score:2},
+    {id:'B',lbl:'Insist on bilateral renegotiation on our own terms',desc:'We negotiate with Varundi directly. Comparable treatment is not a principle we accept.',
+     conseq:'Bilateral talks begin. They are slower than a multilateral process. Paris Club creditors accuse us of obstruction. The restructuring takes 18 months longer than it needed to.',
+     ind:{debt:0,wages:0,rating:-1,reserves:-0.2},def:null,score:-1},
+    {id:'C',lbl:'Offer a symbolic gesture — defer one year of interest',desc:'Demonstrate goodwill without setting a comparable treatment precedent.',
+     conseq:'The gesture is received politely and noted as inadequate by Paris Club creditors. We have not committed to comparable treatment. We have also not resolved anything.',
+     ind:{debt:0,wages:0,rating:0},def:null,score:0}
+   ]},
+  farmer:{
+   briefing:`The IMF programme has removed the fertiliser subsidy entirely. Your production costs have risen 45% in a single season. The agricultural extension service has been cut. Three cooperative members have sold their land. A Chinese agricultural company has approached the cooperative with a long-term lease arrangement: 200 hectares at a rate that, for those who sign, would provide reliable income regardless of crop prices.`,
+   decision:`The subsidy is gone. The cooperative is fragmenting. Independence has become expensive. The lease offers certainty — at the cost of ownership.`,
+   opts:[
+    {id:'A',lbl:'Lease your land to the Chinese company — work it as contracted farmer',desc:'Income certainty. You keep working the land you know, but you are now an employee on it.',
+     conseq:'You sign. The payments arrive reliably — the only reliable income in the district during the lean years ahead. You have given up ownership for stability. Whether it was the right choice depends on what you value.',
+     ind:{debt:0,wages:1,rating:0},def:null,score:0},
+    {id:'B',lbl:'Stay independent — reduce scale, restructure, maintain ownership',desc:'Smaller, poorer, but yours. You keep the option to expand again when things improve.',
+     conseq:'You contract. Two of your six hectares are fallowed. Income falls. But when recovery comes in Phase 7, you have land to expand onto. Independence has a cost. It also has a value.',
+     ind:{debt:0,wages:-2,rating:0},def:null,score:1},
+    {id:'C',lbl:'Sell and move to the city',desc:'The urban informal economy may offer more than a squeezed farm. Your children\'s education is better there.',
+     conseq:'You sell at a depressed price and move. The land is eventually absorbed into the Chinese company\'s lease portfolio. In the city, you find work in construction. The farm is gone.',
+     ind:{debt:0,wages:-1,rating:0},def:'farmer_displacement',score:-1}
+   ]}
+ }
+},
+{id:6, name:'The Breaking Point', years:'2020–2021',
+ world:`In March 2020, the World Health Organisation declares COVID-19 a pandemic. Varundi's copper mines stay open under strict protocols — but the economic shock is severe. Tourism collapses. The informal economy, which employs 60% of urban workers, freezes. Tax revenue falls 22% in three months. Health expenditure requirements surge.
+
+In November 2020, Varundi misses a $42m Eurobond coupon payment. It does not pay within the grace period.
+
+This is a sovereign default — the first in Varundi's modern history. It was not caused by COVID. COVID was the final weight on a structure that had been weakening for a decade.`,
+ roles:{
+  finance_minister:{
+   briefing:`The default was not a single decision. It was the accumulated result of ten years of choices — yours, your predecessors', the creditors', the markets'. The coupon could technically have been paid. Doing so would have meant cutting the health budget in the middle of a pandemic. You made the call. Now you are in default. China and France are co-chairing the official creditor committee. The private Eurobond holders — hedge funds in London and New York — are not yet at the table. This will take years.`,
+   decision:`How you enter the restructuring will determine how long it takes and who bears the cost.`,
+   opts:[
+    {id:'A',lbl:'Apply to G20 Common Framework for coordinated restructuring',desc:'The multilateral route. Slower but legitimate and comprehensive.',
+     conseq:'The application is filed. China and France are announced as co-chairs. Private bondholders are asked — not required — to participate. During the years of negotiation, investment collapses, the currency falls further, and ordinary people live in the limbo.',
+     ind:{debt:0,wages:-3,rating:-1,reserves:0.3},def:null,score:1},
+    {id:'B',lbl:'Pursue bilateral deal with China first, then pressure others',desc:'Faster. China holds the most debt. May create leverage — or strand other creditors.',
+     conseq:'Bilateral talks with Beijing begin. They are slow. China does not want to set a generous precedent. Eight months later a preliminary framework is agreed. Private bondholders reject it. You are back at a multilateral table anyway.',
+     ind:{debt:0,wages:-2,rating:-2},def:null,score:0},
+    {id:'C',lbl:'Engage a professional restructuring advisory firm',desc:'Professional management of negotiations. Expensive. May accelerate the process.',
+     conseq:'Professional advisors are appointed. The process is better organised. It still takes 2.5 years. Some things cannot be accelerated — only managed.',
+     ind:{debt:0,wages:-2,rating:-1,reserves:0.2},def:null,score:1}
+   ]},
+  imf_chief:{
+   briefing:`The default we warned about in 2009 and tried to prevent in 2016 has happened. Our Extended Credit Facility is now the restructuring anchor: no creditor will move before the IMF programme is in place, and the programme cannot disburse while the debt is unsustainable. The G20 Common Framework was designed for this. In practice — from Zambia, Chad, Ethiopia — we know it will take years. During those years, the country remains in limbo.`,
+   decision:`The programme conditions are the lever. How you use them will shape whether this restructuring is comprehensive or cosmetic.`,
+   opts:[
+    {id:'A',lbl:'Fast-track programme approval on modified conditions to unblock restructuring',desc:'Risk: precedent-setting; the Board will push back.',
+     conseq:'The Board approves after three weeks of internal debate. The restructuring begins six months earlier. The conditions — lighter — are met. The Board\'s discomfort is noted in the minutes.',
+     ind:{debt:0,wages:1,rating:1},def:null,score:1},
+    {id:'B',lbl:'Maintain standard programme conditions and communicate the timeline honestly',desc:'Reforms more likely to stick. Process slower.',
+     conseq:'The standard programme is approved after four months of negotiation. The government complies — slowly, partially, with periodic slippage. The restructuring eventually happens.',
+     ind:{debt:0,wages:0,rating:0},def:null,score:0},
+    {id:'C',lbl:'Publicly pressure Eurobond holdout creditors to join the table',desc:'Unusual for the IMF to take sides publicly. High risk.',
+     conseq:'Your public statement naming holdout hedge funds causes a media storm. Two funds capitulate. One sues. The restructuring moves faster in some dimensions and gets mired in legal proceedings in others.',
+     ind:{debt:0,wages:0,rating:0},def:null,score:0}
+   ]},
+  civil_servant:{
+   briefing:`The default is on the radio. The word frightens people. The health budget has been frozen at 2019 levels while the pandemic rages. The Ministry received PPE from a Chinese state enterprise — this is how the wards are managing. Your salary has not been paid in six weeks. You are borrowing from family to cover school fees. You are still at your desk. You are not entirely sure why — except that if you leave, the procurement system stops.`,
+   decision:`Stay or go. The question has been building for years. It has now become urgent.`,
+   opts:[
+    {id:'A',lbl:'Stay',desc:'The public system needs people who know it. The restructuring will end eventually.',
+     conseq:'You stay. The salary arrives late, then later, then roughly on time once the IMF programme begins disbursing. You are poorer than in 2012. When the new graduates arrive in 2024, you are the institutional memory they attach to.',
+     ind:{debt:0,wages:-1,rating:0},def:null,score:1},
+    {id:'B',lbl:'Leave — for the diaspora, another country, or the private sector',desc:'Your family needs stability now, not eventually.',
+     conseq:'You leave. Three weeks later, the person who replaces you has never managed a procurement system under crisis conditions. The drug stockouts worsen. Your decision is understandable. Its consequences are not yours to see.',
+     ind:{debt:0,wages:3,rating:0},def:'left_system',score:-1}
+   ]},
+  opposition_leader:{
+   briefing:`Default. COVID. The government is requesting all-party support for emergency measures. You are being offered a formal position in a national unity government. The terms on the table: your party supports the emergency budget, the government agrees to an independent debt audit. The political risk: unity governments can protect bad actors as easily as the nation.`,
+   decision:`Unity can protect the country. It can also protect the people who created the crisis. You decide what matters more right now.`,
+   opts:[
+    {id:'A',lbl:'Join the unity government — support the budget, push for the audit',desc:'Take the offer. Use the position to demand accountability from the inside.',
+     conseq:'You join. The emergency budget passes. The audit is announced — slowly. From inside the government you can see the full picture of what went wrong. Whether that produces accountability depends on what comes next.',
+     ind:{debt:0,wages:1,rating:1},def:'opp_on_record',score:1},
+    {id:'B',lbl:'Stay in opposition — the public needs a scrutinising voice',desc:'Someone has to hold the government accountable. It cannot be someone in the government.',
+     conseq:'You stay out. The emergency budget passes without you. The audit is promised but not activated without your pressure. From outside, you can say things no minister can. Whether anyone listens is another matter.',
+     ind:{debt:0,wages:0,rating:0},def:null,score:1},
+    {id:'C',lbl:'Join without the audit condition — national unity first',desc:'The audit can come later. Right now the country needs stability.',
+     conseq:'You join without securing the audit. The emergency passes. The audit is quietly shelved. You are inside a government you cannot hold accountable because you are part of it.',
+     ind:{debt:0,wages:0,rating:0},def:null,score:-1}
+   ]},
+  chinexim:{
+   briefing:`Varundi has formally defaulted. The G20 Common Framework has been activated. We are being asked to participate and accept "comparable treatment" — which in practice means real principal haircuts, not just maturity extensions. This sets a precedent we have resisted elsewhere. At the same time, a refusal to participate would leave the restructuring incomplete and damage our reputation globally.`,
+   decision:`We have leverage. Every creditor knows the restructuring cannot succeed without us. The question is what we use that leverage to achieve.`,
+   opts:[
+    {id:'A',lbl:'Participate fully in the Common Framework — accept comparable treatment',desc:'Demonstrate that China can be a responsible creditor within multilateral frameworks.',
+     conseq:'Our participation is noted internationally. The restructuring closes in 18 months — faster than comparable cases. The precedent costs us something. It builds something too.',
+     ind:{debt:-5,wages:1,rating:2,reserves:0.5},def:null,score:2},
+    {id:'B',lbl:'Offer maturity extension only — no principal haircut',desc:'We restructure — but on our terms. Comparable treatment is a concept we reject.',
+     conseq:'Paris Club creditors are furious. The restructuring is delayed by 14 months while the standoff continues. We eventually accept a modified arrangement. The delay cost Varundi, and our standing with it.',
+     ind:{debt:-2,wages:0,rating:0,reserves:0.1},def:null,score:-1},
+    {id:'C',lbl:'Condition our participation on infrastructure concessions',desc:'Port access rights and preferential bidding on three projects in exchange for our restructuring cooperation.',
+     conseq:'Varundi accepts — it has little choice. We participate. The concessions are embedded in the agreement. Three years later they are examined by a debt audit committee.',
+     ind:{debt:-3,wages:0,rating:-1,reserves:0.2},def:'chinexim_bilateral',score:-1}
+   ]},
+  farmer:{
+   briefing:`COVID has closed the regional markets. The default has frozen all government agricultural support. Food prices are up 40% in the towns, but getting crops to market is unreliable. If you stayed in Phase 5, the Chinese company\'s lease payments have been arriving on time — the only reliable income in the district. If you moved to the city, you are watching from a distance as cooperative members lose their land to creditors.`,
+   decision:`Three cooperative members are at risk of losing their land to creditors. The cooperative could potentially acquire it collectively — but everyone who remains would need to contribute.`,
+   opts:[
+    {id:'A',lbl:'Contribute to the collective land acquisition',desc:'Protect the cooperative structure. Pool resources to prevent permanent displacement.',
+     conseq:'The collective acquires the land. It strains your finances but the cooperative holds together. When the recovery comes, you are farming a larger collective unit.',
+     ind:{debt:0,wages:0,rating:0},def:null,score:1},
+    {id:'B',lbl:'Cannot afford to contribute',desc:'Your own position is too precarious. The collective will have to manage without you.',
+     conseq:'You cannot contribute. The land is acquired by a creditor and eventually absorbed into the Chinese company\'s lease. The cooperative shrinks. You survive the season. The community does not.',
+     ind:{debt:0,wages:-1,rating:0},def:null,score:0},
+    {id:'C',lbl:'Acquire the distressed land yourself at depressed prices',desc:'Your position is relatively strong. The asset is real.',
+     conseq:'You buy at a 40% discount. Your landholding doubles. Former cooperative members work the land as day labourers. The transition from farmer to landlord happens in one year of crisis.',
+     ind:{debt:0,wages:2,rating:0},def:null,score:-1}
+   ]}
+ }
+},
+{id:7, name:'The Reckoning', years:'2022–2025',
+ world:`Russia invades Ukraine in February 2022. Food and fuel prices spike globally. For Varundi, which imports most of its fuel and significant quantities of food, this is another external shock piled onto a debt restructuring entering its third year.
+
+The G20 Common Framework negotiations are in impasse: China and Paris Club creditors cannot agree on burden-sharing. Private bondholders demand treatment comparable to official creditors before accepting haircuts.
+
+Then, in late 2024, after 3.5 years: a deal. Eurobond holders accept a 37% haircut. Bilateral creditors reschedule. The IMF Extended Credit Facility has disbursed $1.3 billion. Copper prices have recovered.
+
+The cycle may be beginning again.`,
+ roles:{
+  finance_minister:{
+   briefing:`The restructuring is done. Debt-to-GDP is back to 63% — sustainable, not comfortable. The copper recovery helps. Real wages in the public sector are 35% below their 2012 level. Private investment has not returned to pre-crisis levels. You are writing the budget speech that will frame what happened and what comes next. How honestly you do so will shape whether the lessons are learned or the cycle resumes.`,
+   decision:`The speech is both a political document and a historical one. You choose its frame.`,
+   opts:[
+    {id:'A',lbl:'Write an honest speech — acknowledge what went wrong',desc:'Name the cycle. Describe the constraints. Commit to structural changes.',
+     conseq:'The speech is widely quoted. Uncomfortable in parts. Your opponents use those parts against you. International creditors cite it as evidence of seriousness. Three years later it is assigned reading in a university course on political economy.',
+     ind:{debt:-2,wages:1,rating:1},def:null,score:2},
+    {id:'B',lbl:'Triumphalist speech — Varundi is back, the future is bright',desc:'The politics demand optimism. The cycle is not your problem to solve.',
+     conseq:'The speech lands well domestically. International investors receive it politely. The structural conditions that produced the crisis remain unreformed. The copper price is high. Things feel, for now, like 2010.',
+     ind:{debt:0,wages:0,rating:0},def:null,score:0},
+    {id:'C',lbl:'Attribute the crisis primarily to external factors',desc:'Not wrong. Incomplete.',
+     conseq:'The speech passes without controversy. The external shocks were real. The structural vulnerabilities that made those shocks catastrophic rather than manageable are not discussed. Next time, they will recur.',
+     ind:{debt:0,wages:0,rating:0},def:null,score:0}
+   ]},
+  imf_chief:{
+   briefing:`The programme worked in the technical sense: debt is sustainable again. Reforms were partially implemented. The human cost was severe — real wages in the public sector fell 35%; health and education spending as a share of GDP is lower in 2025 than in 2019. The copper recovery masked structural problems. The narrative is contested: some will say the IMF\'s conditions were essential; others will say they deepened the humanitarian cost of a crisis the IMF\'s own earlier assessments failed to prevent. Both statements contain truth.`,
+   decision:`You are leaving Varundi. You will write a final report. What you say about the IMF\'s own role will shape whether anything changes.`,
+   opts:[
+    {id:'A',lbl:'Commission an internal review of the IMF\'s role, including early assessments',desc:'Were the 2009 and 2013 assessments adequate?',
+     conseq:'The review is commissioned. It finds that public communications understated risks that were flagged internally. The finding is published as a "learning note." It is cited in the next Article IV for a different country.',
+     ind:{debt:0,wages:0,rating:0},def:null,score:2},
+    {id:'B',lbl:'Publish standard post-programme assessment — targets met, move on',desc:'The programme met its benchmarks. That is the metric.',
+     conseq:'The assessment is filed. It is accurate within its frame. The question of whether the frame was adequate is not asked. The file is closed. The next mission begins.',
+     ind:{debt:0,wages:0,rating:0},def:null,score:0},
+    {id:'C',lbl:'Advocate within the IMF for structural reforms to the debt restructuring process',desc:'Use the Varundi case to push for faster timelines and stronger social protection floors.',
+     conseq:'You write the advocacy paper. It circulates internally for two years before finding its way into a G20 working group document. Reform is slow. It is not nothing.',
+     ind:{debt:0,wages:0,rating:0},def:null,score:1}
+   ]},
+  civil_servant:{
+   briefing:`If you stayed: the Ministry of Health runs at 60% of pre-crisis staffing. The procurement system you built has been partially outsourced to a private logistics firm as an IMF condition. Your real wage is lower than 2017. The northern hospital is fully operational. A new cohort of medical graduates arrived this year — the first large cohort in five years. If you left: you are in the diaspora, watching the recovery from a distance, considering whether to return.`,
+   decision:`You have been asked to contribute to a civil service review. What you write will either document what the decade did to the health system, or look forward to the next one.`,
+   opts:[
+    {id:'A',lbl:'Write a submission documenting the health system impact of the past decade',desc:'What was lost. What it would take to rebuild. The staff who left.',
+     conseq:'The submission is detailed and uncomfortable. Two years later it is cited in a WHO report on health system resilience in debt-distressed countries. The staff who left do not come back.',
+     ind:{debt:0,wages:0,rating:0},def:null,score:1},
+    {id:'B',lbl:'Focus on training the new graduates and the next decade',desc:'The past is documented enough. What matters now is the next ten years.',
+     conseq:'You train the new cohort. Your institutional knowledge transfers — imperfectly, incompletely, as it always does. The review is filed by someone else. You are, perhaps, the most useful you have been since 2010.',
+     ind:{debt:0,wages:1,rating:0},def:null,score:1}
+   ]},
+  opposition_leader:{
+   briefing:`The restructuring is done. An election is approaching. You have a file of everything you said about debt from 2009 to 2021 — some of it prescient, some late, some politically motivated. The question is what kind of campaign you run and what kind of accountability you demand. The voters want to look forward. The historical record demands they also look back.`,
+   decision:`What is the central message of your campaign?`,
+   opts:[
+    {id:'A',lbl:'Accountability — demand a public debt audit and prosecute mismanagement',desc:'Name what happened. Name who decided it.',
+     conseq:'The audit campaign resonates with a public that lived through the crisis. It also galvanises opponents who fear accountability. You win a narrow majority. The audit begins. Its findings are uncomfortable for multiple parties — including yours.',
+     ind:{debt:0,wages:0,rating:1},def:null,score:1},
+    {id:'B',lbl:'Renewal — the debt is history, jobs and investment are the future',desc:'Don\'t relitigate. Build.',
+     conseq:'You win comfortably on a forward-looking platform. The audit is deprioritised. The copper boom makes the economic picture look healthy. The structural conditions that produced the crisis remain unreformed.',
+     ind:{debt:0,wages:1,rating:0},def:null,score:0},
+    {id:'C',lbl:'Structural reform — campaign for constitutional fiscal rules',desc:'Break the cycle. Institutionalise the lessons.',
+     conseq:'Your fiscal rules platform is unusual and specific. It attracts technocrats, civil society, and donors. You win with a coalition you did not expect. The constitutional amendment process begins.',
+     ind:{debt:-2,wages:0,rating:1},def:null,score:2}
+   ]},
+  chinexim:{
+   briefing:`The restructuring is done. We took a smaller haircut than Paris Club creditors — maturity extension with limited principal reduction. Three new infrastructure projects are in the pipeline. The international commentary on Chinese lending — "debt trap diplomacy" — has intensified since the Zambia and Varundi cases. A more nuanced counter-narrative is available to us, if we choose to pursue it.`,
+   decision:`How the China Exim Bank represents its own role in Varundi\'s debt cycle will shape perceptions for the next decade of African lending.`,
+   opts:[
+    {id:'A',lbl:'Commission a transparent internal review — publish the findings',desc:'Acknowledge what worked and what didn\'t. Build credibility through honesty.',
+     conseq:'The review is published. It acknowledges that some loans were extended on terms that did not adequately account for Varundi\'s debt trajectory. It is widely cited — critically by some, positively by others. Our credibility improves with borrowers who value transparency.',
+     ind:{debt:0,wages:0,rating:1},def:null,score:2},
+    {id:'B',lbl:'Publish an official case study celebrating the partnership',desc:'Varundi has roads. The restructuring resolved. Frame it as south-south success.',
+     conseq:'The case study is published. It is criticised as incomplete by independent researchers. We have chosen narrative over analysis. The next borrower hears the narrative.',
+     ind:{debt:0,wages:0,rating:0},def:null,score:-1},
+    {id:'C',lbl:'Say nothing — let the relationship continue without public commentary',desc:'The details are commercially sensitive. The relationship is what matters.',
+     conseq:'We say nothing. The relationship continues. The academic literature fills the gap with independent analysis that is less favourable than anything we might have written ourselves.',
+     ind:{debt:0,wages:0,rating:0},def:null,score:0}
+   ]},
+  farmer:{
+   briefing:`The restructuring is done. Agricultural support is slowly returning. If you stayed in Phase 5: your cooperative is smaller but functioning; you have survived, though smaller than before. If you leased your land: the payments came through the crisis years; you are stable but no longer independent. If you sold: you are in the city, watching the recovery from a distance. A government agricultural policy review is underway. You have been invited to give evidence.`,
+   decision:`You can shape what the next policy cycle learns from the last one — if you choose to.`,
+   opts:[
+    {id:'A',lbl:'Give detailed evidence about the impact of subsidy removal and input cost shocks',desc:'Document what actually happened to smallholders. Make the abstract concrete.',
+     conseq:'Your evidence is detailed and specific. It is filed. Two years later it is cited in a World Bank agricultural development report as primary field evidence. The subsidies are not restored — but the design of future support programmes is shaped by what you described.',
+     ind:{debt:0,wages:1,rating:0},def:null,score:1},
+    {id:'B',lbl:'Focus on what future policy should look like',desc:'The past is documented. What matters is what comes next.',
+     conseq:'Your forward-looking submission is well-received. You are appointed to a technical working group on agricultural resilience. The decade of loss is not fully reckoned with. The next decade is better designed because of your input.',
+     ind:{debt:0,wages:1,rating:0},def:null,score:1},
+    {id:'C',lbl:'Decline to participate',desc:'You have said your piece over the years. The system didn\'t listen then.',
+     conseq:'You decline. The review proceeds without your perspective. The policy that emerges is designed by people who did not live what you lived. It is not entirely wrong. It is not entirely right either.',
+     ind:{debt:0,wages:0,rating:0},def:null,score:0}
+   ]}
+ }
+}
+];
+
+// ─── OUTCOMES ────────────────────────────────────────────────────────────────
+const OUTCOMES = {
+ finance_minister:{
+  high:{title:'The Careful Steward',
+   text:`You managed the balance sheet. The choices you made — often against political gravity, often at personal cost — kept the debt trajectory from becoming catastrophic. The country did not default, or defaulted and recovered faster because of the fiscal space you preserved.
+
+What you could not control was the copper price. What you did control was the starting position from which you faced it. History will probably not record this as a triumph — fiscal prudence rarely generates statues. But the civil servants who kept their jobs, the hospitals that kept their drug supplies, the families whose living standards were protected: these are the consequences of decisions made in rooms where every political incentive ran the other way.`},
+  mid:{title:'The Pragmatist',
+   text:`You made some of the hard calls and deferred others. You borrowed when the window was open — because it was — and tried to manage the consequences when it closed. The crisis came anyway. Crises usually do in copper-dependent economies with dollar-denominated debt.
+
+The question is not whether you could have prevented it entirely. Probably not. The question is whether your choices made it worse than it needed to be — or better than it would otherwise have been. That is genuinely uncertain. The counterfactual is unknowable. This is the experience of governing: decisions made under uncertainty, with partial information, in response to pressures only partly understood. The consequences arrive years later, attributed to causes that are only partly yours.`},
+  low:{title:'The Political Economy of Debt',
+   text:`The decisions you made were, individually, explicable. The Eurobond in the boom year: investors were hungry, the infrastructure was needed, the election was coming. The Chinese loans: faster, no conditions, roads are visible. The deferred IMF engagement: the President had made a speech. Each decision made sense in the moment.
+
+The accumulation of those decisions produced a debt crisis that took 3.5 years to resolve and cost the public sector one-third of its real wage value. The civil servant processing hospital drug orders in 2020 on a salary 35% below its 2012 level did not make any of these decisions. She lived inside their consequences. This is the political economy of sovereign debt: the benefits of borrowing are visible and immediate; the costs are diffuse, delayed, and fall on people who were never in the room.`}
+ },
+ imf_chief:{
+  high:{title:'The Honest Broker',
+   text:`You warned when warning was uncomfortable. You held programme conditions when holding them was unpopular. You commissioned the review that asked what the IMF got wrong. None of this made you loved.
+
+The question you carry is whether the institution you represented — with its preferred creditor status, its conditionality toolkit, and its models — is structurally suited to the problem it is supposed to solve. You helped Varundi restructure. You did not help it not need to restructure. Those are different things. The gap between them is the space where better international architecture would have to go.`},
+  mid:{title:'The Instrument',
+   text:`You applied the tools you had to the problem in front of you. Sometimes they worked. Sometimes the timing was wrong, or the conditionality was too rigid, or the projections were too optimistic. The programme closed on schedule. The metrics were met.
+
+What happens inside the metrics — the nurses who left, the procurement systems that broke, the years of reduced social spending — these appear in the annexes of your reports. Whether they should appear somewhere more prominent is a question the institution has not yet fully answered.`},
+  low:{title:'Complicity and Constraint',
+   text:`In retrospect, the 2009 assessment was too optimistic. The 2013 Article IV buried its warnings. The delay before the 2016 programme cost Varundi two years and a third Eurobond at 9% yield.
+
+These are institutional failures as much as personal ones. The IMF operates within incentive structures — preferred creditor status, member government politics, the need to maintain relationships with borrowers — that do not always align with frank advice. You were an instrument of those structures as well as a professional operating within them. The Varundi case is now a case study. Whether your successors draw the right lessons from it depends, in part, on how honestly the post-programme assessment describes what happened.`}
+ },
+ civil_servant:{
+  high:{title:'The System Holds — Barely',
+   text:`You stayed. The northern hospital is fully operational. The new graduates are trained. The procurement system, reconstructed, works better than it did in 2019.
+
+What you rebuilt, you rebuilt from below — without the loans, without the Article IVs, without the creditor committee. With institutional memory and the refusal to let the system collapse entirely. This is not a satisfying story in the way that growth charts and debt sustainability metrics are satisfying. It is a story of maintenance. Of showing up. The health system works because someone was there to make it work. That is not nothing. It is, in fact, everything.`},
+  mid:{title:'The Cost of the Decade',
+   text:`Your real wage is lower than it was in 2012. The colleagues who left did not come back. The procurement system has been partially outsourced. The northern hospital functions.
+
+You have experienced, in your own salary slip and your department's drug stockouts, the human translation of sovereign debt decisions made in rooms you did not enter: the Eurobond issued in 2012, the IMF conditions that froze wages in 2018, the default that froze the health budget in 2020. What you know now — and what cannot be conveyed in a debt sustainability analysis — is that the gap between sustainable and unsustainable debt is measured in hospital drug supplies, school fees, and people who left and did not come back.`},
+  low:{title:'The Brain Drain',
+   text:`You left. You had good reasons. The salary had fallen to 70% of its 2012 real value. It had been unpaid for six weeks. The procurement system was failing and there was nothing you personally could do about it.
+
+The cost of your leaving was not borne by you. It was borne by the patients in wards that no longer had someone who knew how to navigate the system. By the graduates who arrived in 2024 without institutional memory to attach to. Individual decisions to emigrate are rational. Their aggregate effect is a health system that has lost the people who knew how it worked. This is what sovereign debt crises actually cost — not just the restructuring fees and the haircuts, but the doctors, nurses, and civil servants who made reasonable decisions for their families and left.`}
+ },
+ opposition_leader:{
+  high:{title:'The Record',
+   text:`You built a paper trail of honest warnings. You filed the parliamentary question in 2009, the committee submission in 2011, the motion to compel in 2016. Some of what you said was ignored. Some was used against you politically. Some was proved right in ways that were not satisfying.
+
+The debt audit is underway. The accountability mechanisms are stronger for having been used — imperfectly, sometimes belatedly, sometimes tactically, but used. Political accountability for sovereign debt decisions rarely produces neat outcomes. It produces a record. You have a record. In Varundi's next debt cycle, someone will look at it.`},
+  mid:{title:'The Opposition Politician',
+   text:`You played the role of an opposition politician in the way opposition politicians actually play it: sometimes principled, sometimes calculating, sometimes both at once. You warned about the Eurobond when it was politically uncomfortable. You made manifesto promises that were not entirely consistent with your warnings. You abstained on votes you should have supported or opposed.
+
+The country needed voices like yours. It needed them more consistent, more honest, more willing to lose an election on principle. That is easy to say from outside the electoral reality you were navigating. The gap between the politician the situation required and the politician you were is the gap most politicians live in.`},
+  low:{title:'The Mirror Image',
+   text:`The ruling party borrowed for the election. So, in the end, did you — your manifesto was as expensive as theirs, with a fiscal clause you never expected to honour. The crisis was partly their creation; the failure to arrest it was partly yours.
+
+Accountability in a debt crisis is harder when the opposition shares some of the trajectory. The voters know this. The IMF knows this. The question you carry is whether the next cycle will be different because of what you witnessed — or whether the electoral logic that produced this one will produce the next one just the same.`}
+ },
+ chinexim:{
+  high:{title:'The Responsible Creditor',
+   text:`You stayed within your infrastructure mandate. You approved loans with terms that, while commercially oriented, did not accelerate Varundi's debt into unsustainable territory. When the crash came, you offered flexibility that helped prevent a deeper crisis. In the restructuring, you engaged constructively with a multilateral framework that constrained your bilateral leverage.
+
+None of this was costless. The precedent you set carries implications for every future Chinese bilateral loan. The infrastructure is real. The terms were, by any reasonable standard, more responsible than they needed to be given the incentive structure you were operating in. Whether that makes you a model or an outlier within Chinese development finance is a question your successors will answer.`},
+  mid:{title:'The State Actor',
+   text:`You served Chinese state interests — commercial, diplomatic, strategic — in the way Chinese state actors serve those interests: within a framework that sometimes aligned with Varundi's development needs and sometimes ran alongside them without fully coinciding. The infrastructure is real. The roads work. The debt was manageable until it wasn't.
+
+The restructuring was contested but ultimately resolved. The terms were not comparably generous to what Paris Club creditors offered. They were not predatory in the way the most critical commentary claimed. They were, mostly, commercial — which is its own kind of problem in the context of a highly indebted developing economy.`},
+  low:{title:'The Creditor Problem',
+   text:`Loans tied to Chinese contractors. Budget support structured off the official debt register. Resistance to the grace period that would have prevented an early default. Demands for infrastructure concessions during a restructuring.
+
+Each decision individually defensible: our contractors need work, our balance sheet needs protecting, our government needs to see returns. Together, they constitute the version of Chinese lending that critics describe when they use the phrase "debt trap." The infrastructure is real. Whether Varundi could have gotten it on better terms — for less structural debt exposure, with more local content, through more transparent processes — is the question the debt audit committee is now examining.`}
+ },
+ farmer:{
+  high:{title:'The Survivor',
+   text:`Your land is intact. Your cooperative, smaller than it was, is still functioning. You navigated a decade of input cost shocks, subsidy removal, and credit stress without losing the productive base that your family has farmed for two generations.
+
+The decisions that preserved this were not dramatic. They were the accumulation of small conservative choices: not borrowing too much in the good years, switching crops when the cost structure changed, staying independent when the lease offer was tempting. What the economists call "resilience" is what you lived as stubbornness, caution, and refusal to trade permanent for temporary. It was worth it. You are still here.`},
+  mid:{title:'The Managed Loss',
+   text:`You made it — but smaller. The decade of input price shocks, subsidy removal, and credit stress has left you with less land, less capital, and less trust in the institutions that were supposed to support smallholder agriculture.
+
+You did not lose everything. But you lost things. The farm is a fraction of what it was at the peak. The cooperative has members who no longer farm. The extension officer visits once a year if you are lucky. The recovery is real — copper prices are up, and there is money in the national budget again. None of it reaches you as quickly as the costs did. This is the asymmetry of debt cycles for people at the bottom of the chain: the pain is immediate and specific; the recovery is slow and general.`},
+  low:{title:'Displaced',
+   text:`You sold. You are in the city. The land you farmed is now part of a corporate lease. The cooperative exists in name. Your children are in school in the city, which is better in some ways.
+
+The rational responses to each individual shock — borrowing to cover inputs, selling when the subsidy disappeared, moving when the farm stopped making sense — accumulated into a displacement that no single decision caused. The sovereign debt crisis did not reach you through bond spreads or credit ratings. It reached you through the price of fertiliser, the removal of the subsidy, the credit office that wouldn't extend your loan. These are the transmission mechanisms that don't appear in the IMF's debt sustainability analyses but that determine what a crisis actually costs.`}
+ }
+};
+
+// ─── REFLECTION QUESTIONS ────────────────────────────────────────────────────
+const REFLECTION = {
+ finance_minister:[
+  'Looking back across your decisions as Finance Minister: at which phase did the debt trajectory feel most difficult to reverse, and was there a single decision — with hindsight — you would change?',
+  'How did the election cycle and short-term political logic shape your choices? Where did political incentives most sharply diverge from long-term fiscal sustainability, and who bore the cost of that divergence?'
+ ],
+ imf_chief:[
+  'Where did the IMF\'s institutional incentives — maintaining relationships, avoiding political interference, protecting credibility — most constrain what you could honestly say or recommend? Was there a point where the institution\'s interests and the country\'s interests diverged?',
+  'At which phases did you have information that, communicated differently or more forcefully, might have changed the trajectory? What prevented that communication — professional norms, relationship management, or something structural?'
+ ],
+ civil_servant:[
+  'Your decisions were made with the least power and the least information of any role. At what point did structural forces beyond your control most clearly override your individual choices — and what does that suggest about where agency actually lies in a debt crisis?',
+  'At what point did the costs of staying in the system outweigh the costs of leaving — and who ultimately bears the cost of whichever choice you made? What would it take for that calculus to change?'
+ ],
+ opposition_leader:[
+  'At which phase did you find it hardest to separate genuine concern for the public interest from the calculation of political advantage — and what does that difficulty suggest about how accountability works in electoral systems?',
+  'What does the game suggest about the accountability mechanisms available to opposition parties during a debt cycle? At which points did those mechanisms have real leverage, and where did they break down?'
+ ],
+ chinexim:[
+  'At which points did the interests of the Chinese state, the Exim Bank\'s financial position, and Varundi\'s development needs clearly align — and where did they diverge most sharply?',
+  'The terms of Chinese bilateral lending — no political conditionality, tied contractors, commercial rates — are often defended as respecting sovereignty and sometimes criticised as creating unsustainable obligations. What do your decisions in this game suggest about that debate?'
+ ],
+ farmer:[
+  'Your decisions were made at the furthest remove from the national debt decisions that shaped your conditions. At what point did the sovereign debt crisis become most concrete in your daily life — and what does that gap suggest about how debt crises are typically analysed and communicated?',
+  'What would have changed your trajectory — what government policies, IMF conditions, or creditor decisions would have produced materially different outcomes for a smallholder farmer in Varundi?'
+ ]
+};
+const FIXED_REFLECTION = [
+ 'Was there anything in the simulation that was unclear, or that you could not resolve through your own searches?',
+ 'What felt relevant to our class material — and what other insights from your readings would you add to what the game presented?'
+];
+
+// ─── GAME STATE ──────────────────────────────────────────────────────────────
+const S = {
+ screen:'prologue',
+ role:null,
+ phase:0,
+ decisions:[],
+ ind:{debt:22,wages:100,rating:RATING_START,reserves:3.8},
+ deferred:new Set(),
+ score:0,
+ notes:{},
+ maxPhaseReached:0,
+ reviewingFromOutcome:false
+};
+
+// Back navigation — no undo of decisions
+function goBack(){
+  if(S.screen==='roleselect'){ showPrologue(); return; }
+  if(S.screen==='phase'){
+    if(S.phase===1){ S.screen='roleselect'; showRoleSelect(); return; }
+    S.phase--;
+    updateDots();
+    showPhase(S.phase);
+    scrollTop();
+  }
+}
+
+function reviewPhase(n){
+  S.reviewingFromOutcome=true;
+  showPhase(n);
+  scrollTop();
+}
+
+function returnToOutcome(){
+  S.reviewingFromOutcome=false;
+  showOutcome();
+  scrollTop();
+}
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+function ratingStr(v){return RATINGS[Math.max(0,Math.min(RATINGS.length-1,Math.round(v)))]}
+function indClass(k,v){
+ if(k==='debt'){return v>70?'bad':v>50?'warn':'ok'}
+ if(k==='wages'){return v<70?'bad':v<85?'warn':'ok'}
+ if(k==='rating'){return v<=2?'bad':v<=4?'warn':'ok'}
+ if(k==='reserves'){return v<1.5?'bad':v<3.0?'warn':'ok'}
+ return ''
+}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function nl2p(s){return '<p>'+s.replace(/\n\n/g,'</p><p>')+'</p>'}
+
+function renderDashboard(){
+  const d=S.ind.debt,w=S.ind.wages,r=S.ind.rating,res=S.ind.reserves;
+  const dc=indClass('debt',d),wc=indClass('wages',w),rc=indClass('rating',r),resc=indClass('reserves',res);
+  const dPct=Math.min(100,Math.round(d));
+  const wPct=Math.min(100,Math.round(Math.max(0,w-20)/1.1));
+  const resVal=(Math.round(res*10)/10).toFixed(1);
+  const resPct=Math.min(100,Math.round(res/6*100));
+  return `<div class="dashboard">
+    <div class="dash-title">Varundi — Economic Indicators</div>
+    <div class="dash-grid">
+      <div class="dash-item">
+        <div class="dash-label">Debt / GDP</div>
+        <div class="dash-value ${dc}">${Math.round(d)}%</div>
+        <div class="dash-bar-bg"><div class="dash-bar-fill ${dc}" style="width:${dPct}%"></div></div>
+        <div class="dash-sublabel">Warning: &gt;55%</div>
+      </div>
+      <div class="dash-item">
+        <div class="dash-label">Real Wages</div>
+        <div class="dash-value ${wc}">${Math.round(w)}</div>
+        <div class="dash-bar-bg"><div class="dash-bar-fill ${wc}" style="width:${wPct}%"></div></div>
+        <div class="dash-sublabel">Index (100 = 2007)</div>
+      </div>
+      <div class="dash-item">
+        <div class="dash-label">Credit Rating</div>
+        <div class="dash-value ${rc}">${ratingStr(r)}</div>
+        <div class="dash-bar-bg"><div class="dash-bar-fill ${rc}" style="width:${Math.round((r/9)*100)}%"></div></div>
+        <div class="dash-sublabel">Scale: D → BBB−</div>
+      </div>
+      <div class="dash-item">
+        <div class="dash-label">FX Reserves</div>
+        <div class="dash-value ${resc}">${resVal} mo.</div>
+        <div class="dash-bar-bg"><div class="dash-bar-fill ${resc}" style="width:${resPct}%"></div></div>
+        <div class="dash-sublabel">Months of imports · &lt;3.0 warn</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function updateIbar(){
+  const ib=document.getElementById('ibar');if(ib)ib.style.display='none';
+}
+function updateDots(){
+ const c=document.getElementById('dots');c.innerHTML='';
+ for(let i=1;i<=7;i++){
+  const d=document.createElement('div');d.className='dot';
+  if(S.phase>i)d.classList.add('done');
+  else if(S.phase===i)d.classList.add('now');
+  c.appendChild(d);
+ }
+}
+function scrollTop(){window.scrollTo({top:0,behavior:'smooth'})}
+
+// ─── NOTES ───────────────────────────────────────────────────────────────────
+const PHASE_NAMES = ['The Clean Slate','The Boom','The Temptation','The Crash','The Squeeze','The Breaking Point','The Reckoning'];
+
+function toggleNotes(){
+  const panel=document.getElementById('notes-panel');
+  const btn=document.getElementById('notes-btn');
+  const isOpen=panel.classList.contains('open');
+  panel.classList.toggle('open',!isOpen);
+  btn.classList.toggle('active',!isOpen);
+}
+
+function ensureNoteSection(phase){
+  if(S.notes[phase]===undefined) S.notes[phase]='';
+  rebuildNotesPanel();
+}
+
+function rebuildNotesPanel(){
+  const body=document.getElementById('notes-body');
+  const phases=Object.keys(S.notes).map(Number).sort((a,b)=>a-b);
+  if(phases.length===0){
+    body.innerHTML='<p class="notes-empty">Notes will appear here as you progress through each round.</p>';
+    return;
+  }
+  body.innerHTML=phases.map(p=>`
+    <div class="notes-round">
+      <div class="notes-round-label">Phase ${p} — ${PHASE_NAMES[p-1]||''}</div>
+      <textarea id="note-${p}" placeholder="Add your notes here..." onchange="saveNote(${p},this.value)" onkeyup="saveNote(${p},this.value)">${esc(S.notes[p]||'')}</textarea>
+    </div>`).join('')+'<p class="notes-hint">Your notes persist throughout the game. Use them to capture questions, observations, or connections to course material.</p>';
+}
+
+function saveNote(phase,val){ S.notes[phase]=val; }
+
+// ─── SCREENS ─────────────────────────────────────────────────────────────────
+function showPrologue(){
+ S.screen='prologue';
+ document.getElementById('main').innerHTML=`
+  <div class="card">
+   <div class="sub">The Republic of Varundi &mdash; Before We Begin</div>
+   <h2 style="margin-bottom:.8rem">2007. A Clean Slate.</h2>
+   <p>Three years ago, something unprecedented happened. Varundi completed the HIPC debt relief programme. Decades of debt — the legacy of loans taken by governments long gone, for infrastructure never completed, at rates no commodity boom could service — were cancelled. Written off. Gone.</p>
+   <p>Varundi emerged with a balance sheet cleaner than it had been since independence. The IMF called it "a new chapter." The Finance Minister called it "a fresh start." Roads were being built. Schools were opening in districts that had not seen a functioning classroom in a decade.</p>
+   <p>It is 2007. You are about to begin in 2008 — the year everything changed.</p>
+   <p><em>Remember this moment. You will want to remember it.</em></p>
+   <p style="margin-top:1.2rem;font-size:.84rem;background:#f0ede8;border-radius:6px;padding:.75rem 1rem;font-family:sans-serif;color:var(--muted);line-height:1.6">&#128221; <strong style="color:var(--text)">Note-taking:</strong> Use the <strong style="color:var(--text)">Notes</strong> button in the upper-right corner to jot down observations as you play. A text box for each phase will appear as you progress — useful for capturing questions or connections to course material before you reach the reflection questions at the end.</p>
+  </div>
+  <button class="btn" onclick="showRoleSelect()">Choose your role &rarr;</button>`;
+}
+
+function showRoleSelect(){
+ S.screen='roleselect';
+ document.getElementById('main').innerHTML=`
+  <button class="back-btn" onclick="goBack()"> Back</button>
+  <div class="card">
+   <div class="sub">Role Selection</div>
+   <h2>Who are you?</h2>
+   <p style="margin-top:.6rem">Each role experiences the same eighteen years — the same boom, crash, and reckoning — from a completely different position. You see different information, make different decisions, and live with different consequences.</p>
+   <p>Playing all six roles (about 90 minutes) gives the fullest picture. Each individual play takes around 15 minutes.</p>
+  </div>
+  <div class="rgrid">
+   ${Object.entries(ROLES).map(([id,r])=>`
+    <div class="rcard" style="border-color:${r.color}" onclick="startGame('${id}')">
+     <div class="rname" style="color:${r.color}">${r.name}</div>
+     <div class="rdesc">${r.desc}</div>
+    </div>`).join('')}
+  </div>`;
+}
+
+function showPhase(n){
+ S.screen='phase'; S.phase=n;
+
+ // Apply automatic FX reserves change when entering a phase for the first time
+ if(n > S.maxPhaseReached){
+   S.ind.reserves=Math.max(0,S.ind.reserves+(PHASE_RESERVES[n]||0));
+   S.maxPhaseReached=n;
+ }
+
+ ensureNoteSection(n);
+ const ph=PHASES[n-1];
+ const rd=ph.roles[S.role];
+ const ro=ROLES[S.role];
+
+ const prevDec=S.decisions.find(d=>d.phase===n);
+ const prevOpt=prevDec ? rd.opts.find(o=>o.id===prevDec.id) : null;
+
+ let dhtml='';
+ for(const[k,t] of Object.entries(DEF)){
+  if(t.phase===n && S.deferred.has(k)){
+   dhtml+=`<div class="defalert"><div class="dlabel">&#x21BA; Consequence arriving from an earlier decision</div>${tipify(t.text)}</div>`;
+  }
+ }
+
+ const optsHtml=rd.opts.map(o=>{
+  const isChosen=prevDec&&prevDec.id===o.id;
+  const btnStyle=prevDec?(isChosen?`border-color:${ro.color};background:${ro.bg};opacity:1`:'opacity:.55'):'';
+  return `<button class="opt${isChosen?' chosen':''}" id="opt-${o.id}"
+    ${prevDec?'disabled':''}
+    style="${btnStyle}"
+    ${!prevDec?`onclick="choose(${n},'${o.id}',this)"`:''}>
+   <div><span class="letter">${o.id}</span><span class="lbl">${esc(o.lbl)}</span></div>
+   <div class="odesc">${esc(o.desc)}</div>
+  </button>`;
+ }).join('');
+
+ // Copper chart for phases 1, 4, 7
+ let chartHtml='';
+ if(n===1) chartHtml=copperChart(2005,2010,'The 2008 crash');
+ else if(n===4) chartHtml=copperChart(2011,2017,'The 2014–16 collapse');
+ else if(n===7) chartHtml=copperChart(2003,2024,'Full cycle');
+
+ // Navigation buttons — review mode vs normal
+ const backBtnHtml = S.reviewingFromOutcome
+   ? `<button class="back-btn" onclick="returnToOutcome()"> Return to outcome</button>`
+   : `<button class="back-btn" onclick="goBack()"> Back</button>`;
+
+ const nextBtnHtml = S.reviewingFromOutcome
+   ? `<button class="btn btn-outline" onclick="returnToOutcome()" style="margin-top:1.2rem">← Return to outcome</button>`
+   : `<button class="btn" onclick="next(${n})" style="margin-top:1.2rem">${n<7?'Next phase &rarr;':'See your outcome'}</button>`;
+
+ document.getElementById('main').innerHTML=`
+  ${backBtnHtml}
+
+  <div class="card">
+   <div class="sub">Phase ${n} of 7</div>
+   <h2>${ph.name}</h2>
+   <div class="years">${ph.years}</div>
+  </div>
+
+  ${dhtml}
+
+  <div class="card">
+   <div class="slabel world">World Events</div>
+   ${nl2p(tipify(ph.world))}
+   ${chartHtml}
+  </div>
+
+  ${renderDashboard()}
+
+  <div class="card" style="border-left:4px solid ${ro.color}">
+   <div class="rtag" style="background:${ro.bg};color:${ro.color}">${ro.name}</div>
+   <div class="slabel brief" style="color:${ro.color};border-color:${ro.color}">Your Briefing</div>
+   <p>${tipify(rd.briefing)}</p>
+  </div>
+
+  <div class="card" id="decCard">
+   <div class="slabel dec">Your Decision</div>
+   <p style="font-style:italic;color:var(--muted);margin-bottom:.9rem;font-size:.92rem">${tipify(rd.decision)}</p>
+   <div class="opts" id="opts">
+    ${optsHtml}
+   </div>
+   <div class="cbox${prevDec?' show':''}" id="cbox">
+    <div class="clabel">Immediate consequence</div>
+    <p id="ctxt">${prevOpt?tipify(prevOpt.conseq):''}</p>
+    ${nextBtnHtml}
+   </div>
+  </div>`;
+}
+
+function showOutcome(){
+ S.reviewingFromOutcome=false;
+ const ro=ROLES[S.role];
+ let ok='mid';
+ if(S.score>=4)ok='high';
+ else if(S.score<=-2)ok='low';
+ const oc=OUTCOMES[S.role][ok];
+ const roleQ=REFLECTION[S.role];
+
+ const trail=S.decisions.map(d=>{
+  const ph=PHASES[d.phase-1];
+  return`<div class="titem clickable" onclick="reviewPhase(${d.phase})">
+    <span class="tphase">Phase ${d.phase} — ${ph.name}:</span>
+    <span>${d.lbl}</span>
+    <span class="treview">↗ review</span>
+   </div>`;
+ }).join('');
+
+ const ib=document.getElementById('ibar');if(ib)ib.style.display='none';
+ document.getElementById('dots').innerHTML='';
+ document.getElementById('main').innerHTML=`
+  <div class="card">
+   <div class="sub">Outcome Assessment — 2025</div>
+   <h2 style="color:${ro.color}">${oc.title}</h2>
+   <div class="years" style="margin-bottom:.8rem">${ro.name} &mdash; The Republic of Varundi</div>
+  </div>
+  <div class="card">
+   ${nl2p(oc.text)}
+   <div class="trail">
+    <div class="tlabel">Your seven decisions &mdash; click any to review that phase</div>
+    ${trail}
+   </div>
+  </div>
+
+  <div class="reflection-card">
+   <h3>&#128221; Reflection Questions</h3>
+   <div class="reflect-q">
+    <label><em>Question 1</em> — ${esc(roleQ[0])}</label>
+    <textarea placeholder="Your thoughts..."></textarea>
+   </div>
+   <div class="reflect-q">
+    <label><em>Question 2</em> — ${esc(roleQ[1])}</label>
+    <textarea placeholder="Your thoughts..."></textarea>
+   </div>
+   <div class="reflect-q">
+    <label><em>Question 3</em> — ${esc(FIXED_REFLECTION[0])}</label>
+    <textarea placeholder="Your thoughts..."></textarea>
+   </div>
+   <div class="reflect-q">
+    <label><em>Question 4</em> — ${esc(FIXED_REFLECTION[1])}</label>
+    <textarea placeholder="Your thoughts..."></textarea>
+   </div>
+  </div>
+
+  <div class="card" style="text-align:center">
+   <p style="font-size:.88rem;color:var(--muted);margin-bottom:1rem">The same events. A different role. A completely different experience.</p>
+   <button class="btn btn-outline" onclick="reset()">Play again as a different role</button>
+  </div>`;
+}
+
+// ─── ACTIONS ─────────────────────────────────────────────────────────────────
+function startGame(roleId){
+ S.role=roleId; S.phase=1; S.decisions=[]; S.score=0;
+ S.ind={debt:22,wages:100,rating:RATING_START,reserves:3.8};
+ S.deferred=new Set();
+ S.maxPhaseReached=0;
+ S.reviewingFromOutcome=false;
+ updateDots(); showPhase(1); scrollTop();
+}
+
+function choose(phaseN, optId, btn){
+ const ph=PHASES[phaseN-1];
+ const opt=ph.roles[S.role].opts.find(o=>o.id===optId);
+ if(!opt)return;
+
+ document.querySelectorAll('.opt').forEach(b=>{b.disabled=true;b.style.opacity='.55'});
+ btn.style.opacity='1';
+ btn.style.borderColor=ROLES[S.role].color;
+ btn.style.background=ROLES[S.role].bg;
+ btn.classList.add('chosen');
+
+ if(opt.ind){
+  S.ind.debt=Math.max(0,S.ind.debt+(opt.ind.debt||0));
+  S.ind.wages=Math.max(20,S.ind.wages+(opt.ind.wages||0));
+  S.ind.rating=Math.max(0,Math.min(RATINGS.length-1,S.ind.rating+(opt.ind.rating||0)));
+  S.ind.reserves=Math.max(0,S.ind.reserves+(opt.ind.reserves||0));
+ }
+ if(opt.def)S.deferred.add(opt.def);
+ S.score+=(opt.score||0);
+ S.decisions.push({phase:phaseN,id:optId,lbl:opt.lbl});
+
+ document.getElementById('ctxt').innerHTML=tipify(opt.conseq);
+ const cb=document.getElementById('cbox');
+ cb.classList.add('show');
+ cb.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function next(current){
+ if(current>=7){showOutcome();}
+ else{S.phase=current+1;updateDots();showPhase(S.phase);}
+ scrollTop();
+}
+
+function reset(){
+ S.screen='prologue'; S.role=null; S.phase=0;
+ S.decisions=[]; S.ind={debt:22,wages:100,rating:RATING_START,reserves:3.8};
+ S.deferred=new Set(); S.score=0;
+ S.maxPhaseReached=0; S.reviewingFromOutcome=false;
+ const ib=document.getElementById('ibar');if(ib)ib.style.display='none';
+ document.getElementById('dots').innerHTML='';
+ showPrologue(); scrollTop();
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+showPrologue();
+</script>
+</body>
+</html>
